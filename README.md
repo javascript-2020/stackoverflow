@@ -3,7 +3,7 @@ this is what stackoverflow chat is missing
 
 paste this into the console or dev tools snippet/scratchpad, bookmarklet or content script
 
-<code>
+```
 {
         var youtube;
         document.documentElement.style.cssText    = 'width:100%;height:100%;';
@@ -140,4 +140,8 @@ youtube.loadVideoById('Mw9qiV7XlFs')    //  train ride switzerland
 youtube.g.remove();
 https://developers.google.com/youtube/iframe_api_reference
 */
-</code>
+
+```
+
+
+
