@@ -15,7 +15,6 @@ RUN mkdir /var/run/sshd
 RUN echo "root:${password}" | chpasswd
 
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i "s/#Port 22/Port ${ssh}/" /etc/ssh/sshd_config
 EXPOSE $ssh
 
 RUN printf  "%s\n" \
