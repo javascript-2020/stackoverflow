@@ -2,7 +2,7 @@
 # dockerfile
 
 # docker build . -f nodejs-min.dockerfile -t nodejs-min
-# docker run -di -p 2222:22 --name simple-terminal nodejs-min
+# docker run -di -p 2222:22 --name term nodejs-min
 
 FROM node:22
 
