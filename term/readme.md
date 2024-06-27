@@ -14,7 +14,7 @@ download ``` term.js ``` edit the config variables
 
 <br>
 
-then to launch 
+then to launch, electron does not need to be installed
 
 ```
 npx electron term.js
