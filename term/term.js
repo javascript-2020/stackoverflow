@@ -26,8 +26,8 @@
               
               <script type=module>
               
-                    import xterm from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm'
-                    import addonFit from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit/+esm'
+                    import xterm from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
+                    import addonFit from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit/+esm';
                     
                     var term        = new xterm.Terminal();
                     var fitAddon    = new addonFit.FitAddon();
@@ -37,24 +37,18 @@
                     
                     var stream;
                     var {Client}    = require('ssh2');
-                    var con             = new Client();
+                    var con         = new Client();
                     
                     con.on('ready',()=>{
                           fitAddon.fit();
                           term.focus();
                           con.shell((err,stream2)=>{
-                                stream=stream2;
+                                stream    = stream2;
                                 stream.on('data',data=>term.write(data));
                           });
                     });
                     
-                    con.connect({
-                          host        : '127.0.0.1',
-                          port        : 2222,
-                          username    : 'root',
-                          password    : 'node',
-                          debug       : console.log
-                    });
+                    con.connect({host,port,username,password,debug:console.log});
                     
               </script>
         `;
