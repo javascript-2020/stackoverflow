@@ -26,10 +26,14 @@ the dockerfile provides a convenient container to test on
 
 the docker commands are at the top of the file
 
-``` docker build . -f nodejs-min.dockerfile -t nodejs-min ```
+```
+docker build . -f nodejs-min.dockerfile -t nodejs-min
+```
 
 
-``` docker run -di -p 2222:22 --name term nodejs-min ```
+```
+docker run -di -p 2222:22 --name term nodejs-min
+```
 
 and the container will be accessible on the host at ``` localhost:2222 ```
 
