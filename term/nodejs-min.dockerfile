@@ -6,13 +6,8 @@
 
 FROM node:22
 
-ARG password=node
-
 RUN apt update && apt install -y openssh-server
-
-# Set root password for SSH access (change 'node' to your desired password)
-RUN echo "root:${password}" | chpasswd
-
+RUN echo "root:node" | chpasswd
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 RUN printf  "%s\n" \
