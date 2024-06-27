@@ -47,7 +47,7 @@
                           });
                     });
                     
-                    con.connect({host,port,username,password,debug:console.log});
+                    con.connect({host:'${host}',port:${port},username:'${username}',password:'${password}',debug:console.log});
                     
               </script>
         `;
