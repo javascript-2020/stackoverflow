@@ -9,13 +9,11 @@ FROM node:22
 ARG password=node
 
 RUN apt update && apt install -y openssh-server
-RUN mkdir /var/run/sshd
 
 # Set root password for SSH access (change 'node' to your desired password)
 RUN echo "root:${password}" | chpasswd
 
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-EXPOSE 22
 
 RUN printf  "%s\n" \
 "#!/bin/bash" \
