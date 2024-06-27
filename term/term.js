@@ -2,8 +2,7 @@
 //  npm install ssh2
 //  term.js
 
-        var username='root',password='node',
-            host='127.0.0.1',port=2222;
+        var username='root',password='node',host='127.0.0.1',port=2222;
             
         var {app,BrowserWindow} = require('electron');
         var webPreferences={nodeIntegration:true,contextIsolation:false};
