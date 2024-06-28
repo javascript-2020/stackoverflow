@@ -1,9 +1,6 @@
 //  https://github.com/javascript-2020/stackoverflow/blob/main/term/term.js
 
-        //debugger;
-        console.log('term.js',process.argv);
-        
-        var username='root',password='node',host='127.0.0.1',port=2222;
+        var username='root',password='node',host='127.0.0.1',port=process.argv.at(-1)||2222;;
             
         var {app,BrowserWindow}  = require('electron');
         var webPreferences       = {nodeIntegration:true,contextIsolation:false};
