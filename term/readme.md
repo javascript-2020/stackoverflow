@@ -15,6 +15,8 @@ npx -p ssh2 electron -y term
 ```
 
 <br>
+---
+<br>
 
 install ssh2 and electron from npm globally
 
@@ -41,6 +43,8 @@ npm uninstall -g ssh2 electron
 delete directory
 
 <br>
+---
+<br>
 
 install locally
 
@@ -62,6 +66,7 @@ uninstall locally
 delete directory
 
 <br>
+---
 <br>
 
 the dockerfile provides a convenient container to test on
