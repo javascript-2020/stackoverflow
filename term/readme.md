@@ -3,7 +3,7 @@ runs a terminal in a webpage
 download ``` term.js ``` edit the config variables
 
 ```
-        var username='root',password='node',host='127.0.0.1',port=2222;
+var username='root',password='node',host='127.0.0.1',port=2222;
 ```
 
 <br>
