@@ -9,18 +9,18 @@
     
 (async()=>{
 
-        var {code,stdout,stderr}    = await exec('docker images nodejs-min --no-trunc');
+        var {code,stdout,stderr}    = await exec(`docker images ${image} --no-trunc`);
         if(code)return console.log('error');
         if(stdout.indexOf(image)==-1){
               await exists('nodejs-min.dockerfile');
-              var {code,stdout,stderr}    = await exec(`docker build . -f nodejs-min.dockerfile -t ${image}`);
+              var {code,stdout,stderr}    = await exec(`docker build . -f ${image}.dockerfile -t ${image}`);
               if(code)return console.log('error');
         }
 
         var name    = await getname();
         if(!name)return;
         
-        var {code,stdout,stderr}    = await exec(`docker run -di -p :22 --name ${name} nodejs-min`);
+        var {code,stdout,stderr}    = await exec(`docker run -di -p :22 --name ${name} ${image}`);
         if(code)return console.log('error');
         
         var port    = await getport(name);
