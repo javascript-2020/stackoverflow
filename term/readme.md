@@ -4,6 +4,8 @@
 
 for ease of use just download ``` launch.js ``` and run it, it will start a node.js container and connect to it
 
+first start may take a while if it has to cache modules
+
 <br>
 
 download ``` term.js ``` using the download button in the top right
