@@ -1,4 +1,8 @@
-runs a terminal in a webpage
+### runs a terminal in a webpage
+
+for ease of use just download ``` launch.js ``` and run it, it will start a container and connect to it
+
+<br>
 
 download ``` term.js ``` using the download btn in the top right
 
