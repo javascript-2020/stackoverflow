@@ -11,17 +11,49 @@ download ``` term.js ``` edit the config variables
 to launch, without installing ( caches modules )
 
 ```
-npx -p ssh2 electron term.js -y
+npx -p ssh2 electron -y term
 ```
 
 <br>
 
-or install ssh2 and electron from npm globally
+install ssh2 and electron from npm globally
+
+```
+npm install ssh2 electron -g
+```
+
+launch 
+
+```
+npx electron term
+```
+
+uninstall
+
+```
+npm uninstall -g ssh2 electron
+```
+
+delete directory
+
+<br>
+
+install locally
 
 ```
 npm install ssh2 electron
 ```
 
+run
+```
+npx electron term
+```
+
+uninstall locally
+
+delete directory
+
+<br>
 <br>
 
 the dockerfile provides a convenient container to test on
