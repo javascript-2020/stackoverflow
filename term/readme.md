@@ -4,7 +4,7 @@ for ease of use just download ``` launch.js ``` and run it, it will start a node
 
 <br>
 
-download ``` term.js ``` using the download btn in the top right
+download ``` term.js ``` using the download button in the top right
 
 config variables can be specified on the command line, any or none to use defaults
 
