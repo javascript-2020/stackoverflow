@@ -27,7 +27,7 @@
         var port    = stdout.slice(i+1);
         
         await exists('term.js');
-        await exec(`npx -p ssh2 electron -y term ${port}`);
+        await exec(`npx -p ssh2 electron -y term.js ${port}`);
 
 })();
 
