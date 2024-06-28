@@ -1,4 +1,6 @@
-### runs a terminal in a webpage
+### runs a ssh terminal in a webpage
+
+<br>
 
 for ease of use just download ``` launch.js ``` and run it, it will start a node.js container and connect to it
 
