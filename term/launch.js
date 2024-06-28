@@ -3,9 +3,9 @@
 
     var fs      = require('fs');
     var cp      = require('child_process');
-    var net     = require('net');
     
     //process.chdir('/work/tmp/test2/');
+
     
 (async()=>{
 
@@ -113,20 +113,3 @@ async function exists(file){
       
 }//exists
 
-async function port(){
-
-        
-}//port
-
-function isPortTaken(port){
-  
-      var resolve,promise=new Promise(res=>resolve=res);
-      var server=net.createServer().listen(port);
-      server.on('error',err=>resolve(error));
-      server.on('listening',()=>{
-            server.close();
-            resolve(false);
-      });
-      return promise;
-  
-}//isPortTaken
