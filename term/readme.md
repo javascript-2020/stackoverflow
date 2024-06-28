@@ -1,5 +1,12 @@
 ### run a ssh terminal in a webpage
 
+full version now at
+
+launcher : https://github.com/javascript-2020/docker/blob/main/launch.js
+
+terminal : https://github.com/javascript-2020/electron/tree/main/terminal
+
+
 <br>
 
 for ease of use just download ``` launch.js ``` and run it, it will start a node.js container and connect to it
