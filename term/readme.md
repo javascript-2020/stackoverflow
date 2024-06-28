@@ -1,11 +1,5 @@
 runs a terminal in a webpage
 
-it does require installing ssh2 from npm
-
-```
-npm install ssh2
-```
-
 download ``` term.js ``` edit the config variables
 
 ```
@@ -14,10 +8,18 @@ download ``` term.js ``` edit the config variables
 
 <br>
 
-then to launch, electron does not need to be installed
+to launch, without installing ( caches modules )
 
 ```
-npx electron term.js
+npx -p ssh2 electron term.js -y
+```
+
+<br>
+
+it can require installing ssh2 and electron from npm
+
+```
+npm install ssh2 electron
 ```
 
 <br>
