@@ -60,7 +60,7 @@ async function getname(){
 
       async function chk(name){
         
-            var {code,stdout,stderr}    = await exec('docker ps -f name=term');
+            var {code,stdout,stderr}    = await exec('docker ps -f name=terminal');
             if(code){
                   console.log('error');
                   return false;
