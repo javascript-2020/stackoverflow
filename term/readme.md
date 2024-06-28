@@ -19,7 +19,7 @@ username=root password=node host=127.0.0.1 port=2222
 to launch, without installing ( caches modules )
 
 ```
-npx -p ssh2 electron -y term 
+npx -p ssh2 electron -y term
 ```
 
 <br>
