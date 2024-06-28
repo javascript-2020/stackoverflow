@@ -6,10 +6,10 @@ for ease of use just download ``` launch.js ``` and run it, it will start a node
 
 download ``` term.js ``` using the download btn in the top right
 
-edit the config variables
+config variables can be specified on the command line, any or none to use defaults
 
 ```
-var username='root',password='node',host='127.0.0.1',port=2222;
+username=root password=node host=127.0.0.1 port=2222
 ```
 
 <br>
@@ -17,7 +17,7 @@ var username='root',password='node',host='127.0.0.1',port=2222;
 to launch, without installing ( caches modules )
 
 ```
-npx -p ssh2 electron -y term
+npx -p ssh2 electron -y term 
 ```
 
 <br>
