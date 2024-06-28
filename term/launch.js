@@ -72,8 +72,6 @@ async function getname(){
             
       }//chk
             
-            
-      
 }//getname
 
 async function getport(name){
