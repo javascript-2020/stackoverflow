@@ -18,7 +18,7 @@
               
         });
         
-        function arg(name,def){process.argv.reduce((acc,s)=>(s.startsWith(`${name}=`) && s.slice(name.length+1)) || acc,def)}
+        function arg(name,def){return process.argv.reduce((acc,s)=>(s.startsWith(`${name}=`) && s.slice(name.length+1)) || acc,def)}
         
         var html    = `
               <link rel=stylesheet href='https://cdn.jsdelivr.net/npm/@xterm/xterm/css/xterm.min.css'>
