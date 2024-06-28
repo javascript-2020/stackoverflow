@@ -28,7 +28,7 @@
         console.log('port',port);
         
         await exists('term.js');
-        var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js ${port}`);
+        var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js port=${port}`);
         if(code)return console.log('error');
 
         console.log();
