@@ -17,13 +17,15 @@
               if(code)return console.log('error');
         }
 
-        var name    = getname();
+        var name    = await getname();
         if(!name)return;
+        console.log('name',name);
         
         var {code,stdout,stderr}    = await exec(`docker run -di -p :22 --name ${name} nodejs-min`);
         if(code)return console.log('error');
         
-        var port    = await getport();
+        var port    = await getport(name);
+        console.log('port',port);
         
         await exists('term.js');
         var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js ${port}`);
@@ -37,30 +39,31 @@
 })();
 
 
-function getname(){
+async function getname(){
   
       do{
             var name      = get();
-            var result    = chk(name);
+            var result    = await chk(name);
             if(result===false){
                   return false;
             }
             
       }while(result!==true);
+      
       return name;
             
             
       function get(){
         
             var col       = ['red','blue','pink','aqua','gold','gray','lime','navy'];
-            var flower    = ['Rose','Lily','Iris','Fern','Dahlia','Tulip','Pansy','Basil','Sage','Mint'];
+            var flower    = ['rose','lily','iris','fern','dahlia','tulip','pansy','basil','sage','mint'];
             var rnd       = arr=>arr[Math.floor(Math.random()*arr.length)];
             var name      = `term---${rnd(col)}-${rnd(flower)}`;
             return name;
             
       }//get
 
-      function chk(name){
+      async function chk(name){
         
             var {code,stdout,stderr}    = await exec('docker ps -f name=term');
             if(code){
@@ -78,7 +81,7 @@ function getname(){
       
 }//getname
 
-async function getport(){
+async function getport(name){
   
       var {code,stdout,stderr}    = await exec(`docker port ${name}`);
       if(code)return console.log('error');
