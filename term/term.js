@@ -5,6 +5,8 @@
             host        = arg('host','127.0.0.1'),
             port        = arg('port',2222);
             
+        console.log(username,password,host,port);
+        
         var {app,BrowserWindow}  = require('electron');
         var webPreferences       = {nodeIntegration:true,contextIsolation:false};
         app.whenReady().then(()=>{
