@@ -2,6 +2,7 @@
 
         var username='root',password='node',host='127.0.0.1',port=2222;
             
+        debugger;
         console.log(process.argv);
         
         var {app,BrowserWindow}  = require('electron');
