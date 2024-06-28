@@ -37,7 +37,7 @@ docker build . -f nodejs-min.dockerfile -t nodejs-min
 docker run -di -p 2222:22 --name term nodejs-min
 ```
 
-and the container will be accessible on the host at ``` localhost:2222 ```
+and the container will be accessible via ssh on the docker host at ``` localhost:2222 ```
 
 
 
