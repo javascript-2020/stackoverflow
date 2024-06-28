@@ -99,7 +99,7 @@ console.clear();
     var fs        = require('fs');
     
     var url       = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=true`,headers;
-    token && (headers={authorization:`Bearer ${token_str}`});
+    token && (headers={authorization:`Bearer ${token}`});
     var json      = await fetch(url,{headers}).then(res=>res.json());
     
     await Promise.all(json.tree.map(async item=>{
@@ -114,7 +114,7 @@ console.clear();
           }
           var url     = `https://api.github.com/repos/javascript-2020/stackoverflow/contents/${item.path}`;
           var opts    = {headers:{accept:'application/vnd.github.raw+json'}};
-          token && (opts.headers.authorization=`Bearer ${token_str}`);
+          token && (opts.headers.authorization=`Bearer ${token}`);
           
           var buf     = await fetch(url,opts).then(res=>res.arrayBuffer());
           buf         = Buffer.from(buf);
