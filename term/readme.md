@@ -16,7 +16,7 @@ npx -p ssh2 electron term.js -y
 
 <br>
 
-it can require installing ssh2 and electron from npm
+or install ssh2 and electron from npm globally
 
 ```
 npm install ssh2 electron
