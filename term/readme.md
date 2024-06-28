@@ -28,6 +28,10 @@ launch
 npx electron term
 ```
 
+```
+npm start
+```
+
 uninstall
 
 ```
@@ -47,6 +51,10 @@ npm install ssh2 electron
 run
 ```
 npx electron term
+```
+
+```
+npm start
 ```
 
 uninstall locally
