@@ -53,7 +53,7 @@ async function getname(){
             var col       = ['red','blue','pink','aqua','gold','gray','lime','navy'];
             var flower    = ['rose','lily','iris','fern','dahlia','tulip','pansy','basil','sage','mint'];
             var rnd       = arr=>arr[Math.floor(Math.random()*arr.length)];
-            var name      = `term---${rnd(col)}-${rnd(flower)}`;
+            var name      = `terminal---${rnd(col)}-${rnd(flower)}`;
             return name;
             
       }//get
