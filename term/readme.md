@@ -114,7 +114,7 @@ download single term.js file
 
 <br>
 
-download the files from here : https://download-github-folder-upk2ftc8bmxe.runkit.sh/?javascript-2020,stackoverflow,main,term
+download all the files from here : https://download-github-folder-upk2ftc8bmxe.runkit.sh/?javascript-2020,stackoverflow,main,term
 
 this is subject to github rate restrictions 60 per hour, it originates from a public server
 
