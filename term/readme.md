@@ -27,7 +27,7 @@ launch
 ```
 npx electron term
 ```
-
+or
 ```
 npm start
 ```
@@ -52,7 +52,7 @@ run
 ```
 npx electron term
 ```
-
+or
 ```
 npm start
 ```
