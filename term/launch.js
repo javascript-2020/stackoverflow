@@ -19,23 +19,18 @@
 
         var name    = await getname();
         if(!name)return;
-        console.log('name',name);
         
         var {code,stdout,stderr}    = await exec(`docker run -di -p :22 --name ${name} nodejs-min`);
         if(code)return console.log('error');
         
         var port    = await getport(name);
-        console.log('port',port);
+        
+        console.log(`*** launch : ${name}:${port}`);
         
         await exists('term.js');
-        var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js port=${port}`);
+        var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js title=${name} port=${port}`);
         if(code)return console.log('error');
 
-        console.log('.');
-        console.log('.');
-        console.log(`.done. ${name}:${port}`);
-        console.log('.');
-        console.log('.');
 })();
 
 
