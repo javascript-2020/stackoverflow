@@ -1,5 +1,8 @@
 //  https://github.com/javascript-2020/stackoverflow/blob/main/term/term.js
 
+        //debugger;
+        console.log('term.js',process.argv);
+        
         var username='root',password='node',host='127.0.0.1',port=2222;
             
         var {app,BrowserWindow}  = require('electron');
@@ -24,9 +27,6 @@
               <div id=terminal></div>
               
               <script type=module>
-              
-                    debugger;
-                    console.log(process.argv);
               
                     import xterm from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
                     import addonFit from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit/+esm';
