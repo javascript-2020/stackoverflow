@@ -1,6 +1,6 @@
 ### runs a terminal in a webpage
 
-for ease of use just download ``` launch.js ``` and run it, it will start a container and connect to it
+for ease of use just download ``` launch.js ``` and run it, it will start a node.js container and connect to it
 
 <br>
 
