@@ -1,5 +1,4 @@
 //  https://github.com/javascript-2020/stackoverflow/blob/main/term/term.js
-//  npm install ssh2
 
         var username='root',password='node',host='127.0.0.1',port=2222;
             
