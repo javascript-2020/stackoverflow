@@ -1,6 +1,4 @@
 
-    var port    = 2222;
-    var name    = 'term';
     var image   = 'nodejs-min';    
 
     var fs      = require('fs');
@@ -8,7 +6,6 @@
     var net     = require('net');
     
     process.chdir('/work/tmp/test2/');
-
     
 (async()=>{
 
@@ -17,7 +14,11 @@
         if(stdout.indexOf(image)==-1){
               await exists('nodejs-min.dockerfile');
               var {code,stdout,stderr}    = await exec(`docker build . -f nodejs-min.dockerfile -t ${image}`);
+              if(code)return console.log('error');
         }
+
+        var name    = getname();
+        if(!name)return;
         
         var {code,stdout,stderr}    = await exec(`docker run -di -p :22 --name ${name} nodejs-min`);
         if(code)return console.log('error');
@@ -25,28 +26,71 @@
         var port    = await getport();
         
         await exists('term.js');
-        await exec(`npx -p ssh2 electron -y term.js ${port}`);
+        var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js ${port}`);
+        if(code)return console.log('error');
 
+        console.log();
+        console.log();
+        console.log(`done. ${name}:${port}`);
+        console.log();
+        console.log();
 })();
 
 
-function getport(){
+function getname(){
+  
+      do{
+            var name      = get();
+            var result    = chk(name);
+            if(result===false){
+                  return false;
+            }
+            
+      }while(result!==true);
+      return name;
+            
+            
+      function get(){
+        
+            var col       = ['red','blue','pink','aqua','gold','gray','lime','navy'];
+            var flower    = ['Rose','Lily','Iris','Fern','Dahlia','Tulip','Pansy','Basil','Sage','Mint'];
+            var rnd       = arr=>arr[Math.floor(Math.random()*arr.length)];
+            var name      = `term---${rnd(col)}-${rnd(flower)}`;
+            return name;
+            
+      }//get
+
+      function chk(name){
+        
+            var {code,stdout,stderr}    = await exec('docker ps -f name=term');
+            if(code){
+                  console.log('error');
+                  return false;
+            }
+            if(stdout.indexOf(name)!=-1){
+                  return 'found';
+            }
+            return true;
+            
+      }//chk
+            
+            
+      
+}//getname
+
+async function getport(){
   
       var {code,stdout,stderr}    = await exec(`docker port ${name}`);
       if(code)return console.log('error');
       var i       = stdout.indexOf(':');
       var port    = stdout.slice(i+1);
-  
+      return port;
+      
 }//getport
 
 function exec(cmd){
   
       var resolve,promise=new Promise(res=>resolve=res);
-      /*
-      var parts   = cmd.split(' ');
-      cmd         = parts[0];
-      var args    = parts.slice(1);
-      */
       var args    = cmd.split(' ');
       var cmd     = 'powershell.exe';
       var child   = cp.spawn(cmd,args);
