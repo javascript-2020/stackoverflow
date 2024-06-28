@@ -1,6 +1,8 @@
 runs a terminal in a webpage
 
-download ``` term.js ``` edit the config variables
+download ``` term.js ``` using the download btn in the top right
+
+edit the config variables
 
 ```
 var username='root',password='node',host='127.0.0.1',port=2222;
@@ -93,6 +95,22 @@ and the container will be accessible via ssh on the docker host at ``` localhost
 <br>
 
 ---
+
+<br>
+
+download single term.js file
+
+```
+
+        var token   = '';
+        var owner   = 'javascript-2020',repo='stackoverflow',path='term/term.js';
+        var url     = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+        var opts    = {headers:{accept:'application/vnd.github.raw+json'}};
+        token && (opts.headers.authorization=`Bearer ${token_str}`);
+        var txt     = await fetch(url,opts).then(res=>res.text());
+        require('fs').writeFileSync('term.js',txt);
+
+```
 
 <br>
 
