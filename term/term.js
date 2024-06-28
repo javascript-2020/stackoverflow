@@ -2,9 +2,6 @@
 
         var username='root',password='node',host='127.0.0.1',port=2222;
             
-        debugger;
-        console.log(process.argv);
-        
         var {app,BrowserWindow}  = require('electron');
         var webPreferences       = {nodeIntegration:true,contextIsolation:false};
         app.whenReady().then(()=>{
@@ -12,6 +9,10 @@
               win.maximize();
               win.webContents.openDevTools();
               win.loadURL(`data:text/html;base64,${btoa(html)}`);
+              
+        debugger;
+        console.log(process.argv);
+              
         });
         
         var html    = `
