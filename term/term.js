@@ -10,8 +10,6 @@
               win.webContents.openDevTools();
               win.loadURL(`data:text/html;base64,${btoa(html)}`);
               
-        debugger;
-        console.log(process.argv);
               
         });
         
@@ -26,6 +24,9 @@
               <div id=terminal></div>
               
               <script type=module>
+              
+                    debugger;
+                    console.log(process.argv);
               
                     import xterm from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
                     import addonFit from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit/+esm';
