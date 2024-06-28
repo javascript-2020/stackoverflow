@@ -5,7 +5,7 @@
     var cp      = require('child_process');
     var net     = require('net');
     
-    process.chdir('/work/tmp/test2/');
+    //process.chdir('/work/tmp/test2/');
     
 (async()=>{
 
