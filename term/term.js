@@ -26,15 +26,15 @@
                     import xterm from 'https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/+esm';
                     import addonFit from 'https://cdn.jsdelivr.net/npm/@xterm/addon-fit/+esm';
                     
+                    var {Client}    = require('ssh2');
+                    var con         = new Client();
+                    var stream;
+                    
                     var term        = new xterm.Terminal();
                     var fitAddon    = new addonFit.FitAddon();
                     term.loadAddon(fitAddon);
                     term.open(terminal);
                     term.onKey(({key,domEvent:e})=>stream.write(key));
-                    
-                    var stream;
-                    var {Client}    = require('ssh2');
-                    var con         = new Client();
                     
                     con.on('ready',()=>{
                           fitAddon.fit();
