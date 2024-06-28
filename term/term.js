@@ -3,8 +3,11 @@
         var username    = arg('username','root'),
             password    = arg('password','node'),
             host        = arg('host','127.0.0.1'),
-            port        = arg('port',2222);
-            
+            port        = arg('port',2222),
+            title       = arg('title','term.js');
+            title       = `${title} - ${username}@${host}:${port}`;
+
+        console.log(title);            
         console.log(username,password,host,port);
         
         var {app,BrowserWindow}  = require('electron');
@@ -21,6 +24,7 @@
         function arg(name,def){return process.argv.reduce((acc,s)=>(s.startsWith(`${name}=`) && s.slice(name.length+1)) || acc,def)}
         
         var html    = `
+              <title>${title}</title>
               <link rel=stylesheet href='https://cdn.jsdelivr.net/npm/@xterm/xterm/css/xterm.min.css'>
               <style>
                     html { height:100% }
