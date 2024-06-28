@@ -31,11 +31,11 @@
         var {code,stdout,stderr}    = await exec(`npx -p ssh2 electron -y term.js port=${port}`);
         if(code)return console.log('error');
 
-        console.log();
-        console.log();
-        console.log(`done. ${name}:${port}`);
-        console.log();
-        console.log();
+        console.log('.');
+        console.log('.');
+        console.log(`.done. ${name}:${port}`);
+        console.log('.');
+        console.log('.');
 })();
 
 
