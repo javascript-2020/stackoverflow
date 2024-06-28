@@ -1,4 +1,4 @@
-### runs a ssh terminal in a webpage
+### run a ssh terminal in a webpage
 
 <br>
 
