@@ -2,8 +2,9 @@ could come in handy Star Trek Iconic Sounds https://trekcore.com/audio
 
 this is the one i was looking for TNG Chime https://trekcore.com/audio/doors/tng_chime_clean.mp3, ( i think anyway )
 
-Audio Cutter mp3cut.net
-MP3 Compressor freeconvert.com/mp3-compressor
+Audio Cutter https://mp3cut.net
+
+MP3 Compressor https://freeconvert.com/mp3-compressor
 
 ```
 
