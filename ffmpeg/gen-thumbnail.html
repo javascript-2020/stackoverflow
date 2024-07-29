@@ -4,6 +4,12 @@
       }
       img {
         border:1px solid blue;
+        width:300px;
+      }
+      pre {
+            border:1px solid lightgray;
+            height:300px;
+            overflow:auto;
       }
       canvas {
         border:1px solid green;
@@ -13,15 +19,19 @@
 <h3>ffmpeg in the browser, loaded from github</h3>
 <h3>generate thumbnail</h3>
 <h4 id=init>initialising...</h4>
-<pre id=log></pre>
+<pre id=output></pre>
 
 <script>
 
 (async()=>{   console.clear();
 
+      log.enabled   = true;
+      log.output    = true;
+      log.console   = true;
+
       
-      var url       = 'https://raw.githubusercontent.com/javascript-2020/ffmpeg.wasm/main/';
-      var fetch2    = file=>(console.log('fetch',file),fetch(url+file).then(res=>res.text()));
+      var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/ffmpeg/';
+      var fetch2    = file=>(log('fetch',file),fetch(url+file).then(res=>res.text()));
       var files     = {
             'ffmpeg.js'       : await fetch2('ffmpeg.js'),
             'index.js'        : await fetch2('index.js'),
@@ -33,7 +43,7 @@
       var sandbox       = {};
       
       sandbox.worker    = `
-            var main_url      = 'https://raw.githubusercontent.com/javascript-2020/ffmpeg.wasm/main/';
+            var main_url      = '${url}';
             var sf            = fetch;
             fetch             = url=>new Promise(async resolve=>{
                                                                                           console.log('worker-fetch',url);
@@ -55,10 +65,10 @@
       sandbox.main      = `
             (()=>{
             
-                  var main_url      = 'https://raw.githubusercontent.com/javascript-2020/ffmpeg.wasm/main/';
+                  var main_url      = '${url}';
                   var globalThis    = {document:{currentScript:{src:main_url}}};
                   var Worker        = function(url){
-                                                                                            console.log('worker-sandbox',url.toString(),url.pathname);            
+                                                                                            log('worker-sandbox',url.toString(),url.pathname);            
                         if(!url.toString().startsWith('https')){
                               return new window.Worker(url.toString());
                         }
@@ -86,8 +96,8 @@
       var {fetchFile}   = FFmpegUtil;
       var {FFmpeg}      = FFmpegWASM;
       var ffmpeg        = ffmpeg = new FFmpeg();
-      ffmpeg.on('log',({message})=>console.log);
-      ffmpeg.on('progress',({progress,time})=>console.log(`${progress*100}%,time:${time}`));
+      ffmpeg.on('log',({message})=>log(message));
+      ffmpeg.on('progress',({progress,time})=>log(`${progress*100}%,time:${time}`));
       await ffmpeg.load({coreURL:"ffmpeg-core.js"});
       await ffmpeg.exec(['-version']);
       
@@ -118,6 +128,14 @@
       document.body.append(br);
       var br    = document.createElement('br');
       document.body.append(br);
+      
+      var ui    = {};
+      ui.name   = document.createElement('div');
+      document.body.append(ui.name);
+      ui.size   = document.createElement('div');
+      document.body.append(ui.size);
+      var br    = document.createElement('br');
+      document.body.append(br);
 
       var canvas    = document.createElement('canvas');
       //document.body.append(canvas);
@@ -129,21 +147,32 @@
       
       async function thumbnail(name,file){
       
+            ui.name.textContent   = name;
+            ui.size.textContent   = (file.size/1000000).toFixed(2)+' MB';
             
+            name    = name.replaceAll(' ','-');      
             await ffmpeg.writeFile(name,await fetchFile(file));
             
             var secs    = 1;
             sample();
             
             async function sample(){
-                                                                                                console.log('start');                  
+                                                                                                log('start');                  
                   var cmd     = `ffmpeg -ss 00:00:${String(secs).padStart(2,'0')}.00 -i ${name} -vframes 1 output.png`;
-                                                                                                console.log(cmd);
+                                                                                                log(cmd);
                   var args    = cmd.split(' ');
                   args.shift();
+
                   
-          	      var r   = await ffmpeg.exec(args);    
-                                                                                                console.log('done',r);
+
+                  log.enabled   = false;
+                  
+          	      var r         = await ffmpeg.exec(args);    
+          	      
+          	      log.enabled   = true;
+
+          	      
+                                                                                                log('done',r);
                   if(r!==0)return;
                   
                   var data    = await ffmpeg.readFile('output.png');
@@ -193,13 +222,29 @@
                   b  += img.data[i+2]/n*4*step;
                   
             }//for
-                                                                                    console.log(r,g,b);
+                                                                                    log('60 :',r+g+b);
             //await new Promise(res=>document.onclick=e=>res());
             
             var result    = (r+g+b>threshold);
             return result;
         
       }//test
+
+      
+      function log(){
+        
+            if(!log.enabled)return;
+            var str   = [...arguments].join(' ');
+        
+            if(log.output){
+                  output.append(str+'\n');
+                  output.scrollTop   = 9999999999;
+            }
+            if(log.console){
+                  console.log(str);
+            }
+            
+      }//log
       
 })();
 
