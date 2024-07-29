@@ -1,0 +1,190 @@
+<style>
+      body {
+        font-family:arial;
+      }
+      img {
+        border:1px solid blue;
+        width:300px;
+      }
+      pre {
+            border:1px solid lightgray;
+            height:300px;
+            overflow:auto;
+      }
+      canvas {
+        border:1px solid green;
+      }
+</style>
+
+<script src='ffmpeg.js'></script>
+<script src='index.js'></script>
+
+<h3>ffmpeg in the browser, loaded from local</h3>
+<h3>generate thumbnail</h3>
+<h4 id=init>initialising...</h4>
+<pre id=output></pre>
+
+<script>
+
+(async()=>{   console.clear();
+
+      log.enabled   = true;
+      log.output    = true;
+      log.console   = true;
+
+      var {fetchFile}   = FFmpegUtil;
+      var {FFmpeg}      = FFmpegWASM;
+      var ffmpeg        = ffmpeg = new FFmpeg();
+      ffmpeg.on('log',({message})=>log(message));
+      ffmpeg.on('progress',({progress,time})=>log(`${progress*100}%,time:${time}`));
+      await ffmpeg.load({coreURL:"ffmpeg-core.js"});
+      await ffmpeg.exec(['-version']);
+      
+      init.remove();
+      
+      var input         = document.createElement('input');
+      input.value       = 'buck.mp4';
+      input.type        = 'button';
+      input.onclick     = async e=>{
+        
+                                var blob    = await fetch(url+'buck.mp4').then(res=>res.blob());
+                                thumbnail('buck.mp4',blob);
+                                
+                          };
+      document.body.append(input);
+                          
+      var input         = document.createElement('input');
+      input.type        = 'file';
+      input.onchange    = e=>{
+        
+                                var file    = input.files[0];
+                                thumbnail(file.name,file);
+                                
+                          };
+      document.body.append(input);
+      
+      var br    = document.createElement('br');
+      document.body.append(br);
+      var br    = document.createElement('br');
+      document.body.append(br);
+      
+      var ui    = {};
+      ui.name   = document.createElement('div');
+      document.body.append(ui.name);
+      ui.size   = document.createElement('div');
+      document.body.append(ui.size);
+      var br    = document.createElement('br');
+      document.body.append(br);
+
+      var canvas    = document.createElement('canvas');
+      //document.body.append(canvas);
+      var ctx       = canvas.getContext('2d');
+
+      var img       = document.createElement('img');
+      document.body.append(img);
+
+      
+      async function thumbnail(name,file){
+      
+            ui.name.textContent   = name;
+            ui.size.textContent   = (file.size/1000000).toFixed(2)+' MB';
+            
+            name    = name.replaceAll(' ','-');      
+            await ffmpeg.writeFile(name,await fetchFile(file));
+            
+            var secs    = 1;
+            sample();
+            
+            async function sample(){
+                                                                                                log('start');                  
+                  var cmd     = `ffmpeg -ss 00:00:${String(secs).padStart(2,'0')}.00 -i ${name} -vframes 1 output.png`;
+                                                                                                log(cmd);
+                  var args    = cmd.split(' ');
+                  args.shift();
+
+                  
+
+                  log.enabled   = false;
+                  
+          	      var r         = await ffmpeg.exec(args);    
+          	      
+          	      log.enabled   = true;
+
+          	      
+                                                                                                log('done',r);
+                  if(r!==0)return;
+                  
+                  var data    = await ffmpeg.readFile('output.png');
+                  var blob    = new Blob([data.buffer]);
+                  var url     = window.URL.createObjectURL(blob);
+      
+                  
+                  img.src       = url;
+                  img.onload    = async e=>{
+                  
+                        if(!await test(img)){
+                              secs++;
+                              sample();
+                              return;
+                        }
+                        
+                  };
+                  
+                  
+                  /*
+                  var a         = document.createElement('a');
+                  a.download    = 'output.png';
+                  a.href        = window.URL.createObjectURL(blob);
+                  a.click();
+                  */
+                  
+            }//sample
+            
+      }//thumbnail
+
+
+      async function test(img,threshold=60){
+            
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            
+            var img     = ctx.getImageData(0,0,canvas.width,canvas.height);
+            var n       = img.data.length;
+            var r       = 0;
+            var g       = 0;
+            var b       = 0;
+            var step    = 10;
+            
+            for(var i=0;i<n;i+=4*step){
+                  
+                  r  += img.data[i]/n*4*step;
+                  g  += img.data[i+1]/n*4*step;
+                  b  += img.data[i+2]/n*4*step;
+                  
+            }//for
+                                                                                    log('60 :',r+g+b);
+            //await new Promise(res=>document.onclick=e=>res());
+            
+            var result    = (r+g+b>threshold);
+            return result;
+        
+      }//test
+
+      
+      function log(){
+        
+            if(!log.enabled)return;
+            var str   = [...arguments].join(' ');
+        
+            if(log.output){
+                  output.append(str+'\n');
+                  output.scrollTop   = 9999999999;
+            }
+            if(log.console){
+                  console.log(str);
+            }
+            
+      }//log
+      
+})();
+
+</script>
