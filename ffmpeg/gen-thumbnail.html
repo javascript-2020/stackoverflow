@@ -78,7 +78,7 @@
                         var js        = \`${sandbox.worker}\`;
                         var blob      = new Blob([js]);
                         var url       = window.URL.createObjectURL(blob);
-                        var worker    = new Worker(url);
+                        var worker    = new window.Worker(url);
                         worker.postMessage({lib:files['ffmpeg-core.js'],file:files[name]});
                         return worker;
                         
