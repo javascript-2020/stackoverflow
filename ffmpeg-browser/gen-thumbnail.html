@@ -30,7 +30,7 @@
       log.console   = true;
 
       
-      var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/ffmpeg/';
+      var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/ffmpeg-browser/';
       var fetch2    = file=>(log('fetch',file),fetch(url+file).then(res=>res.text()));
       var files     = {
             'ffmpeg.js'       : await fetch2('ffmpeg.js'),
