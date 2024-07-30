@@ -3,44 +3,58 @@
 
 (async()=>{
 
-  var path      = require('path');
-  var fs        = require('fs');
-  
   fetch.import    = async url=>{
-                          var txt   = await fetch(url).then(res=>res.text());
-                          txt       = txt.replaceAll('export','module.export=');
-                          eval(`var fn=${txt};fn;`);
+
+                          var txt       = await fetch(url).then(res=>res.text());
+                          var sandbox   = `
+                                (()=>{
+                                
+                                      var fn    =
+                                      ${txt};
+                                      
+                                      return fn;
+                                      
+                                })()
+                          `;
+                          var fn    = eval(sandbox);
                           return fn;
-                };
-  var getmime    = await fetch.import('https://raw.githubusercontent.com/javascript-2020/libs/main/js/string/getmime');
+                          
+                    }//fetch.import
+                    
+  var getmime     = (await fetch.import('https://raw.githubusercontent.com/javascript-2020/libs/main/js/string/getmime'));
   
-  var docroot   = '.';
+  var fs          = require('fs');
+  var path        = require('path');
   
   require('http').createServer(request).listen(8080);
   console.log('listening 8080');
   
   function request(req,res){
   
-        var url     = req.url.slice(1);
-        var file    = resolve(url);
-        console.log(file,fs.existsSync(file));
+        var file    = resolve(req.url);
+        
         if(!file || !fs.existsSync(file)){
               res.writeHead(404);
-              res.end('not found '+req.url);
+              res.end('not found : '+req.url);
               return;
         }
         
+        var ext       = path.extname(file);
         var type      = getmime(file);
-        var stream    = fs.createReadStream(file);
-        
+        console.log(file,type);
+
         res.writeHead(200,{'content-type':type});
+        var stream    = fs.createReadStream(file);
         stream.pipe(res);
         
   }//request
 
   
-  function resolve(url){
-  
+  function resolve(url,docroot='.'){
+
+        if(url[0]=='/'){
+              url    = url.slice(1);
+        }
         url         = decodeURI(url);
         var p2      = path.resolve(docroot);
         var file    = path.resolve(docroot,url);
