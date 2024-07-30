@@ -1,5 +1,5 @@
 {
-  scripts:{
-    "start":"node server"
+  "scripts":{
+    "start":"cd ffmpeg-browser && node server"
   }
 }
