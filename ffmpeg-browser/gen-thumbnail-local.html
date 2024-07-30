@@ -48,9 +48,8 @@
       input.value       = 'buck.mp4';
       input.type        = 'button';
       input.onclick     = async e=>{
-        debugger;
+
                                 var blob    = await fetch(url+'buck.mp4').then(res=>res.blob());
-                                debugger;
                                 thumbnail('buck.mp4',blob);
                                 
                           };
@@ -87,8 +86,8 @@
       document.body.append(img);
 
       
-      async function thumbnail(name,file){debugger;
-      
+      async function thumbnail(name,file){
+                                                                                                log(name);
             ui.name.textContent   = name;
             ui.size.textContent   = (file.size/1000000).toFixed(2)+' MB';
             
