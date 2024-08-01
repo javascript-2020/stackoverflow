@@ -1,0 +1,31 @@
+
+                                                                                console.clear();
+        fn(1,2,3);        //  {a: 1, b: 2, c: 3}
+        fn({a:99});       //  {a: 99}
+        
+        function fn(a,b,c){
+              
+              var params    = parse(fn,[...arguments]);
+              console.log('params',params);
+              
+        }//fn
+        
+        function parse(fn,args){
+                                                                                console.log(arguments.callee.caller);
+                                                                                console.log(arguments.callee.caller.arguments);
+              fn            = fn.toString();
+              var i1        = fn.indexOf('(');
+              var i2        = fn.indexOf(')');
+              var params    = fn.slice(i1+1,i2);
+              var names     = params.split(',');
+              
+              var params;
+              if(typeof args[0]!='object'){
+                    params    = {};
+                    names.forEach((name,i)=>params[name]=args[i]);
+              }else{
+                    params    = args[0];
+              }
+              return params;
+              
+        }//parse
