@@ -1,0 +1,57 @@
+// noprotect
+
+console.clear();
+
+
+(async()=>{
+
+        var speed       = 100;   // pixels / sec
+        var width       = 750;
+        
+        var abort       = false;
+        var i           = 0;
+        
+        var img             = document.createElement('img');
+        img.style.cssText   = 'position:absolute;top:50px;width:40px;height:20px;';
+        img.src             =
+              'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAAAXNSR0IArs4c6QAAAdhJREFUOE+dkk'+
+              '1oE1EQgL+XbGPWJloLYjWioAVJodhTaCAIKhZElEIU9SAiFYoHEak/tSgePHgVwV48eVIKigcLgncLjRahjdKCllTrT0xat5vNbh'+
+              'Lfe5IcahsiFN9tYOabN/ON0Fpr6p60FtFLv8An8LdtR/iN+pR/xqIRsDI7jXP/DvrrZ0RkB82XbtO0s31N0IbAaqVybKzr55E/vz'+
+              'NnrCef7MNS4LpuDRwOh4lEIkSjUUKh0HKzVUAtHXQpg2hqA2MTD24N8vL1OM6KpZgBybF4AbekGR3fSHc8wdUWMI+eJLCnE6FK37'+
+              'TKv0AvjaFmRyEr0HaIytZTjIy8o2Db/JCQrojaDy8mNYfOPEZIm0f3TpPxDnIjOwmeS+DEOcTvhVea3FPU4lv0py/oXBCVb6ayYS'+
+              '+p1AJusUhWwkQZ0mXB0FmT7uQT0GWeDR9hKr+PoVwaig7++H7+jqwVqvAGXZxBrNsG4QSDlwdITU6tkrGlxaOvtxXX83j4vExnV4'+
+              'IrxQzBw8cxe3pXAOscaiWxbl5gfmaa9xVBNt6zLEUIURNRlRKLxWjfvQvh89cIDS1L28IZvoucGAPTxOy/RjB+4P/PpvzxA2p+Dn'+
+              'w+jI4ujNbNa4JVk/4AiIXaI1rqbjIAAAAASUVORK5CYII='
+        ;
+        document.body.append(img);
+        
+        var stat              = document.createElement('div');
+        stat.style.cssText    = 'font-family:monospace;'
+        document.body.append(stat);
+        
+        document.documentElement.onkeydown    = e=>abort=true;
+        document.documentElement.onmousedown  = e=>abort=true;
+
+        update(0);
+        
+        
+        function update(time){
+
+              var dist            = Math.floor(time/1000*speed);
+              var x               = dist%width;
+              
+              img.style.left      = x+'px';
+              
+              var str             = `${i} ${time} ${dist} ${x}`;
+              stat.textContent    = str;
+              console.log(str);
+              
+              i++;
+              
+              if(abort)return;
+              requestAnimationFrame(update);
+              
+        }//update
+        
+        
+})();
