@@ -1,0 +1,8 @@
+shame huh
+        var a   = {'nav'};          //  Uncaught SyntaxError: Unexpected string
+
+        var a   = {'nav':'nav'};    //  {"nav":"nav"}
+
+
+
+        
