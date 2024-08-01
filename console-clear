@@ -1,0 +1,6 @@
+    console.clear=function(){
+
+          console.clear();
+          console.log.apply(console,arguments);
+
+    }//clear
