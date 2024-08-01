@@ -1,0 +1,206 @@
+<style>
+      body {
+        font-family:arial;
+      }
+      img {
+        border:1px solid blue;
+      }
+      canvas {
+        border:1px solid green;
+      }
+</style>
+
+<h3>ffmpeg in the browser, loaded from github</h3>
+<h3>generate thumbnail</h3>
+<h4 id=init>initialising...</h4>
+<pre id=log></pre>
+
+<script>
+
+(async()=>{   console.clear();
+
+      
+      var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/ffmpeg/';
+      var fetch2    = file=>(console.log('fetch',file),fetch(url+file).then(res=>res.text()));
+      var files     = {
+            'ffmpeg.js'       : await fetch2('ffmpeg.js'),
+            'index.js'        : await fetch2('index.js'),
+            '814.ffmpeg.js'   : await fetch2('814.ffmpeg.js'),
+            'ffmpeg-core.js'  : await fetch2('ffmpeg-core.js'),
+      };
+      
+      
+      var sandbox       = {};
+      
+      sandbox.worker    = `
+            var main_url      = '${url}';
+            var sf            = fetch;
+            fetch             = url=>new Promise(async resolve=>{
+                                                                                          console.log('worker-fetch',url);
+                                          var res   = await sf(main_url+url)
+                                                                                          console.log('ok');
+                                          resolve(res);
+                                          
+                                     });
+                                
+            self.onmessage    = e=>{
+            
+                  var file            = e.data.lib;
+                  var importScripts   = ()=>self.eval(file);
+                  eval(e.data.file);
+                  
+            };
+      `;
+      
+      sandbox.main      = `
+            (()=>{
+            
+                  var main_url      = '${url}';
+                  var globalThis    = {document:{currentScript:{src:main_url}}};
+                  var Worker        = function(url){
+                                                                                            console.log('worker-sandbox',url.toString(),url.pathname);            
+                        if(!url.toString().startsWith('https')){
+                              return new window.Worker(url.toString());
+                        }
+                        
+                        var i         = url.pathname.lastIndexOf('/');
+                        var name      = url.pathname.slice(i+1);
+                        var js        = \`${sandbox.worker}\`;
+                        var blob      = new Blob([js]);
+                        var url       = window.URL.createObjectURL(blob);
+                        var worker    = new Worker(url);
+                        worker.postMessage({lib:files['ffmpeg-core.js'],file:files[name]});
+                        return worker;
+                        
+                  };
+      
+                  ${files['ffmpeg.js']}
+                  
+            })();
+      `;
+
+      
+      eval(sandbox.main);
+      eval(files['index.js']);
+
+      var {fetchFile}   = FFmpegUtil;
+      var {FFmpeg}      = FFmpegWASM;
+      var ffmpeg        = ffmpeg = new FFmpeg();
+      ffmpeg.on('log',({message})=>console.log);
+      ffmpeg.on('progress',({progress,time})=>console.log(`${progress*100}%,time:${time}`));
+      await ffmpeg.load({coreURL:"ffmpeg-core.js"});
+      await ffmpeg.exec(['-version']);
+      
+      init.remove();
+      
+      var input         = document.createElement('input');
+      input.value       = 'buck.mp4';
+      input.type        = 'button';
+      input.onclick     = async e=>{
+        
+                                var blob    = await fetch(url+'buck.mp4').then(res=>res.blob());
+                                thumbnail('buck.mp4',blob);
+                                
+                          };
+      document.body.append(input);
+                          
+      var input         = document.createElement('input');
+      input.type        = 'file';
+      input.onchange    = e=>{
+        
+                                var file    = input.files[0];
+                                thumbnail(file.name,file);
+                                
+                          };
+      document.body.append(input);
+      
+      var br    = document.createElement('br');
+      document.body.append(br);
+      var br    = document.createElement('br');
+      document.body.append(br);
+
+      var canvas    = document.createElement('canvas');
+      //document.body.append(canvas);
+      var ctx       = canvas.getContext('2d');
+
+      var img       = document.createElement('img');
+      document.body.append(img);
+
+      
+      async function thumbnail(name,file){
+      
+            
+            await ffmpeg.writeFile(name,await fetchFile(file));
+            
+            var secs    = 1;
+            sample();
+            
+            async function sample(){
+                                                                                                console.log('start');                  
+                  var cmd     = `ffmpeg -ss 00:00:${String(secs).padStart(2,'0')}.00 -i ${name} -vframes 1 output.png`;
+                                                                                                console.log(cmd);
+                  var args    = cmd.split(' ');
+                  args.shift();
+                  
+          	      var r   = await ffmpeg.exec(args);    
+                                                                                                console.log('done',r);
+                  if(r!==0)return;
+                  
+                  var data    = await ffmpeg.readFile('output.png');
+                  var blob    = new Blob([data.buffer]);
+                  var url     = window.URL.createObjectURL(blob);
+      
+                  
+                  img.src       = url;
+                  img.onload    = async e=>{
+                  
+                        if(!await test(img)){
+                              secs++;
+                              sample();
+                              return;
+                        }
+                        
+                  };
+                  
+                  
+                  /*
+                  var a         = document.createElement('a');
+                  a.download    = 'output.png';
+                  a.href        = window.URL.createObjectURL(blob);
+                  a.click();
+                  */
+                  
+            }//sample
+            
+      }//thumbnail
+
+
+      async function test(img,threshold=60){
+            
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            
+            var img     = ctx.getImageData(0,0,canvas.width,canvas.height);
+            var n       = img.data.length;
+            var r       = 0;
+            var g       = 0;
+            var b       = 0;
+            var step    = 10;
+            
+            for(var i=0;i<n;i+=4*step){
+                  
+                  r  += img.data[i]/n*4*step;
+                  g  += img.data[i+1]/n*4*step;
+                  b  += img.data[i+2]/n*4*step;
+                  
+            }//for
+                                                                                    console.log(r,g,b);
+            //await new Promise(res=>document.onclick=e=>res());
+            
+            var result    = (r+g+b>threshold);
+            return result;
+        
+      }//test
+      
+})();
+
+</script>
