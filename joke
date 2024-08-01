@@ -1,0 +1,13 @@
+        (async()=>{
+
+              var div             = document.createElement('div');
+              div.style.cssText   = 'font-family:arial;font-size:24px;font-weight:bold;'  +
+                                    'color:gray;text-align:center;margin-top:50px;';
+              div.textContent     = 'Please Wait';
+              document.body.append(div);
+
+              await new Promise(res=>setTimeout(res,3500));
+
+              start();
+
+        })();
