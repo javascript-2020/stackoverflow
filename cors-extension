@@ -1,0 +1,71 @@
+//  manifest.json - chrome
+
+        {
+        
+              "manifest_version"                        : 3,
+              
+              "name"                                    : "cors",
+              "version"                                 : "1.0.0",
+              
+              "icons"                                   : {"48":"asterisk.png"},
+              
+              "background"                              : {"service_worker":"extension.js"},
+              
+              "permissions"                             : ["declarativeNetRequest"],
+              
+              "host_permissions"                        : ["<all_urls>"]
+              
+        }
+
+
+//  manifest.json - firefox
+
+        {
+        
+              "manifest_version"                    : 3,
+              
+              "name"                                : "cors",
+              "version"                             : "1",
+              
+              "icons"                               : {"48":"asterisk.png"},
+              
+              "permissions"                         : ["declarativeNetRequest"],
+              
+              "background"                          : {"scripts":["extension.js"]},
+              
+              "action"                              : {"default_icon":"asterisk.png"},
+              
+              "host_permissions"                    : ["<all_urls>"]
+              
+        }
+
+
+//  extension.js
+
+          if(typeof browser==='undefined'){
+                browser   = chrome;
+          }
+          
+          browser.runtime.onInstalled.addListener(()=>{
+          
+                var rule    = {
+                      id: 1,
+                      condition: {},
+                      action: {
+                            type: 'modifyHeaders',
+                            responseHeaders: [
+                                  {header: 'access-control-allow-origin',operation:'set',value:'*'},
+                            ],
+                      },
+                };
+                
+                browser.declarativeNetRequest.updateDynamicRules({addRules:[rule],removeRuleIds:[rule.id]});
+                
+          });
+
+
+
+https://i.sstatic.net/1K0TZ8a3.png
+
+
+
