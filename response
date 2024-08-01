@@ -1,0 +1,9 @@
+(async ()=>{
+
+      var res     = new Response('<html></html>');
+      var fetch   = (url,opts)=>new Promise(resolve=>resolve(res));
+
+      var txt   = await fetch('http://localhost/index.html').then(res=>res.text());
+      console.log(txt);
+
+})();
