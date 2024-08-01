@@ -1,0 +1,27 @@
+        
+        <textarea></textarea>
+        
+        
+        <script>
+        
+              var textfield   = document.getElementsByTagName('textarea')[0];
+
+        
+              var debounce    = (callback,delay=2_000)=>{
+                    
+                    var timer;
+                    
+                    return ()=>{
+              
+                          clearTimeout(timer);
+                          timer   = setTimeout(callback,delay);
+                          
+                    };
+                    
+              }//debounce
+              
+              
+              textfield.oninput   = debounce(()=>console.log('!! fire in the hole !!'));
+              
+              
+        </script>
