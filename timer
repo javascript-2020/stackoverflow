@@ -1,0 +1,9 @@
+              function timer(callback,auto=false,delay=500){
+
+                    var timer;
+                    var abort   = ()=>clearTimeout(timer);
+                    var reset   = ()=>(abort(),timer=setTimeout(callback,delay));
+                    auto && reset();
+                    return {reset,abort};
+
+              }//timer
