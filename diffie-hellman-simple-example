@@ -1,0 +1,11 @@
+        //var dh=diffie_hellman(16);
+
+        p=>2299307027,g=>844
+        alice=25997,A=>2268330737
+        bob=51936,B=>170510822
+        shared_secret=435653706
+
+        var encrypted=tiny.encrypt('rise and rise again until lambs become lions',shared_secret);
+        console.log(encrypted);
+        var decrypted=tiny.decrypt(encrypted,shared_secret);
+        console.log(decrypted);
