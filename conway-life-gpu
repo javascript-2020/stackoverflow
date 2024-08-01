@@ -1,0 +1,298 @@
+
+<!-- conway-life-webgpu.html -->
+
+<style>
+      canvas {
+            position:absolute;
+            left:0;
+            top:0;
+            width:100%;
+            height:100%;
+      }
+      button {
+            position:absolute;
+            left:10px;
+            top:10px;
+            font-size:20px;
+            padding:10px 20px;
+            cursor:pointer;
+      }
+</style>
+
+<canvas></canvas>
+<button>stop</button>
+
+<script type=module>
+
+      if(!navigator.gpu)throw 'webgpu not supported';
+      
+      var adapter                     = await navigator.gpu.requestAdapter();
+      if(!adapter)throw 'no gpu adapter';
+      
+      
+      var abort                       = false;
+      var btn                         = document.querySelector('button');
+      btn.onclick                     = e=>abort=true;
+      
+      
+      var device                      = await adapter.requestDevice();
+      var format                      = navigator.gpu.getPreferredCanvasFormat();
+      
+      var canvas                      = document.querySelector('canvas');
+      canvas.width                    = canvas.offsetWidth;
+      canvas.height                   = canvas.offsetHeight;
+      var ctx                         = canvas.getContext('webgpu');
+      ctx.configure({device,format});
+      
+      
+      var step                        = 0;
+      var WORKGROUP_SIZE              = 8;
+      var width                       = canvas.width;
+      var height                      = canvas.height;
+      
+      
+      var shaderCode                  = {};
+      setup();
+      
+      
+ //vertex
+                                        var vertices    = new Float32Array([
+                                              -0.8, -0.8,
+                                               0.8, -0.8,
+                                               0.8,  0.8,
+                                               
+                                              -0.8, -0.8,
+                                               0.8,  0.8,
+                                              -0.8,  0.8,
+                                        ]);
+                                        var size    = vertices.byteLength
+                                        var usage   = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+      var vertexBuffer                = device.createBuffer({label:'cell vertices',size,usage});
+      device.queue.writeBuffer(vertexBuffer,0,vertices);
+      
+      var vertexBufferLayout          = {arrayStride:8,attributes:[{format:'float32x2',offset:0,shaderLocation:0}]};
+      
+      
+//cellState
+                                        var n                           = width*height;
+                                        var cellStateArray              = new Uint32Array(n);
+                                        for(var i=0;i<n;i++){
+                                        
+                                              cellStateArray[i]         = Math.random()>0.6 ? 1 : 0;
+                                              
+                                        }//for
+                                        var size    = cellStateArray.byteLength;
+                                        var usage   = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
+      var cellStateStorage            = [
+                                              device.createBuffer({label:'stateA',size,usage}),
+                                              device.createBuffer({label:'stateB',size,usage})
+                                        ];
+      device.queue.writeBuffer(cellStateStorage[0],0,cellStateArray);
+      
+      
+//shaderModules
+
+      var cellShaderModule            = device.createShaderModule({
+                                              label             : 'cell shader',
+                                              code              : shaderCode.cell
+                                        });
+      var simulationShaderModule      = device.createShaderModule({
+                                              label             : 'simulation shader',
+                                              code              : shaderCode.simulation
+                                        });
+                                        
+//bindGroups
+                                        var vis1    = GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE;
+                                        var vis2    = GPUShaderStage.COMPUTE;
+      const bindGroupLayout           = device.createBindGroupLayout({
+                                              label               : 'Cell Bind Group Layout',
+                                              entries : [
+                                                                    {binding:1,visibility:vis1,buffer:{type:'read-only-storage'}},
+                                                                    {binding:2,visibility:vis2,buffer:{type:'storage'}}
+                                              ]
+                                        });
+                                        
+      var bindGroups                  = [
+                                              device.createBindGroup({
+                                                    label         : 'Cell renderer bind group A',
+                                                    layout        : bindGroupLayout,
+                                                    entries : [
+                                                                    {binding:1,resource:{buffer:cellStateStorage[0]}},
+                                                                    {binding:2,resource:{buffer:cellStateStorage[1]}}
+                                                    ],
+                                              }),
+                                              device.createBindGroup({
+                                                    label         : 'Cell renderer bind group B',
+                                                    layout        : bindGroupLayout,
+                                                    entries: [
+                                                                    {binding:1,resource:{buffer:cellStateStorage[1]}},
+                                                                    {binding:2,resource:{buffer:cellStateStorage[0]}}
+                                                    ]
+                                              })
+                                        ];
+                                        
+                                        
+//pipeline
+
+      var pipelineLayout              = device.createPipelineLayout({
+                                              label               : 'Cell Pipeline Layout',
+                                              bindGroupLayouts    : [bindGroupLayout]
+                                        });
+      var cellPipeline                = device.createRenderPipeline({
+                                              label               : 'Cell pipeline',
+                                              layout              : pipelineLayout,
+                                              vertex  : {
+                                                    module        : cellShaderModule,
+                                                    entryPoint    : 'vertexMain',
+                                                    buffers       : [vertexBufferLayout]
+                                              },
+                                              fragment  : {
+                                                    module        : cellShaderModule,
+                                                    entryPoint    : 'fragmentMain',
+                                                    targets       : [{format}]
+                                              }
+                                        });
+      var simulationPipeline          = device.createComputePipeline({
+                                              label               : 'Simulation pipeline',
+                                              layout              : pipelineLayout,
+                                              compute : {
+                                                    module        : simulationShaderModule,
+                                                    entryPoint    : 'computeMain',
+                                              }
+                                        });
+                                        
+                                        
+                                        
+      (function update() {
+      
+      
+                  var encoder           = device.createCommandEncoder();
+                  
+                  
+                  var computePass       = encoder.beginComputePass();
+                  
+                  computePass.setPipeline(simulationPipeline);
+                  computePass.setBindGroup(0,bindGroups[step%2]);
+                  
+                  
+                  var workgroupCount    = Math.ceil(width/WORKGROUP_SIZE);
+                  computePass.dispatchWorkgroups(workgroupCount,workgroupCount);
+                  
+                  
+                  computePass.end();
+                  
+                  
+                  var pass              = encoder.beginRenderPass({
+                                                  colorAttachments: [{
+                                                        view          : ctx.getCurrentTexture().createView(),
+                                                        loadOp        : "clear",
+                                                        clearValue    : {r:0,g:0,b:0.4,a:1.0},
+                                                        storeOp       : "store",
+                                                  }]
+                                            });
+                                            
+                  pass.setPipeline(cellPipeline);
+                  pass.setBindGroup(0,bindGroups[step%2]);
+                  pass.setVertexBuffer(0,vertexBuffer);
+                  pass.draw(vertices.length/2,width*height);
+                  
+                  pass.end();
+                  
+                  
+                  
+                  device.queue.submit([encoder.finish()]);
+                  
+                  
+                  if(abort)return;
+                  step++;
+                  requestAnimationFrame(update);
+                  
+                  
+      })();//update
+      
+      
+      
+      
+      function setup(){
+      
+            shaderCode.cell   = `
+            
+                  struct VertexInput {
+                        @location(0) pos : vec2f,
+                        @builtin(instance_index) instance : u32
+                  };
+                  
+                  const grid    = vec2f(${width},${height});
+                  
+                  @group(0) @binding(1) var<storage> cellState : array<u32>;
+                  
+                  @vertex
+                  fn vertexMain(input : VertexInput) -> @builtin(position) vec4f {
+                  
+                        let i             = f32(input.instance);
+                        let cell          = vec2f(i%${width},floor(i/${height}));
+                        let state         = f32(cellState[input.instance]);
+                        let cellOffset    = cell/grid*2;
+                        let gridPos       = (input.pos*state+1)/grid-1+cellOffset;
+                        return vec4f(gridPos,0,1);
+                        
+                  }//vertextMain
+                  
+                  @fragment
+                  fn fragmentMain() -> @location(0) vec4f {
+                  
+                        return vec4f(1,1,1,1);
+                        
+                  }//fragmentMain
+                  
+            `;
+            
+            
+            shaderCode.simulation   = `
+            
+                  @group(0) @binding(1) var<storage> cellStateIn : array<u32>;
+                  @group(0) @binding(2) var<storage,read_write> cellStateOut : array<u32>;
+                  
+                  fn cellIndex(cell: vec2u) -> u32 {
+                  
+                        return (cell.y%u32(${height}))*u32(${width})+(cell.x%u32(${width}));
+                        
+                  }//cellIndex
+                  
+                  fn cellActive(x: u32, y: u32) -> u32 {
+                  
+                        return cellStateIn[cellIndex(vec2(x, y))];
+                        
+                  }//cellActive
+                  
+                  @compute
+                  @workgroup_size(${WORKGROUP_SIZE},${WORKGROUP_SIZE})
+                  fn computeMain(@builtin(global_invocation_id) cell : vec3u) {
+                  
+                        let activeNeighbors   = cellActive(cell.x+1,cell.y+1)   +
+                                                cellActive(cell.x+1,cell.y)     +
+                                                cellActive(cell.x+1,cell.y-1)   +
+                                                cellActive(cell.x,cell.y-1)     +
+                                                cellActive(cell.x-1,cell.y-1)   +
+                                                cellActive(cell.x-1,cell.y)     +
+                                                cellActive(cell.x-1,cell.y+1)   +
+                                                cellActive(cell.x,cell.y+1)
+                        ;
+                        
+                        let i   = cellIndex(cell.xy);
+                        
+                        switch activeNeighbors {
+                        
+                          case 2    : {cellStateOut[i]    = cellStateIn[i];}
+                          case 3    : {cellStateOut[i]    = 1;}
+                          default   : {cellStateOut[i]    = 0;}
+                          
+                        }//switch
+                        
+                  }//computeMain
+                  
+            `;
+            
+      }//setup
+      
+</script>
