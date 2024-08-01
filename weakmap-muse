@@ -1,0 +1,32 @@
+
+                                                                                console.clear();
+
+        var map   = new WeakMap();
+
+        var a   = document.createElement('div');
+        map.set(a,()=>'hello');
+        
+        console.log(map.get(a)());
+        
+  //:
+
+        var mem     = [];
+        mem.rnd     = ()=>Math.random();
+        mem.add     = (node,fn,index)=>(index=mem.rnd(),mem.push({index,node,fn}),index);
+        mem.rem     = node=>(i=mem.findIndex(o=>o.node===node)) ?? mem.splice(i,1,0);
+        mem.get     = node=>mem.find(o=>o.index==node.dataset.index);
+        
+        var div             = document.createElement('div');
+        div.dataset.index   = mem.add(div,()=>'world');
+        
+        console.log(mem.get(div).fn());
+        
+        mem.rem(div);
+
+
+//
+
+
+        mem.rem     = (node,i)=>(i=mem.findIndex(o=>o.node===node),mem.splice(i,1));
+
+
