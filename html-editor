@@ -1,0 +1,21 @@
+<style>
+      html,body{margin:0;height:100%}
+      body {display:flex}
+      #editor{flex:1}
+      iframe{width:50%;box-sizing:border-box}
+</style>
+
+<body>
+      <div id=editor></div>
+      <iframe id=iframe></iframe>
+</body>
+
+<script type=module>
+      import ace from 'https://cdn.jsdelivr.net/npm/ace-builds/+esm';
+      var editor                    = ace.edit('editor');
+      editor.container.onkeydown    = e=>{if(e.key=='Enter' && e.ctrlKey){
+                                          var doc=iframe.contentDocument;
+                                          doc.open();doc.write(editor.getValue());doc.close()
+                                      }};
+      editor.focus();
+</script>
