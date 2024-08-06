@@ -1,0 +1,54 @@
+var srcdoc      = `
+
+<style>
+
+      .icon {
+            display         : inline-block;
+            text-align      : center;
+            background      : whitesmoke;
+            border-radius   : 5px;
+            border          : 1px solid lightgray;
+            padding         : 5px 3px 0px;
+            cursor          : pointer;
+            margin-right    : 10px;
+            min-width       : 50px;
+      }
+
+      .label {
+            margin          : 2px 0 0;
+      }
+      
+</style>
+
+<div id="home" class="icon">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAABA5JREFUOE+lkVtsVEUYx//fnDnn7KW73XZ7peVSWtvSC5duGrXGkBLFUH1AfdD0DWNMn3zwwURJZA2++CKJvtCoSBMkaoLEBDEYpBQCldRSUnq11La4lF7YstfuntuM2cIjKLGTTDLJN//f9/1mCE+womdP+Ae+u1V/99Ls8IHZ49l/i9AT8JA+czx06du5nxam459t8fg/b78Yth+X+09gODyqdW3ua5mfSLQOXkrEa3Tt5PqA3yx3FmXvvMiFzRY8G/vDB0qPrkv542NLB+Pp1GEpBAV8viOH3ip9b13Aj75cOBhLxg8LIagoUHAk/HbZ/wNeGZNvKhyha8MxNRhQ3yUiWloxjz2zI3BXEmbanqKvHzXpYz/l6qT8ghG6LEcmGENh7qJty5imMo8ATrXVUucjgVJKdusW1EgEjs8HcrtBo6NwCqozrddGFrozhrMdkA+zBE1lU60NJV2puby+xkYomQxkMglZWQmlpgYWXR6XtZyjUzgYAUMeAUVk48K5y3cnLMJpAHsXlhfhOAIVZWUgQr8lsvv2P7+1WnLskcA9CKSYgibbxknqH5MtNomfpZRuAIyIDEHijd6+5d+hKaelkHvHpqYghIOG2joojPVnLHVfx25fiEn2vZRSByCIKMMle5l6zieCI5ORU5msuTvn5dKVyYYtJR2BAk9qas74wTDFbkA8VGY55cHKDZ79mWRCnZxd/iVrOXW5otul9TXVVb5O73TPewoc+0eAXsoVfB7FeHpn8Sd5bt5sOeLVmb9X1fISV04VkYUsqio9tsbpt9Ws82v/jXuHU6u250E3ee6+wl+j8ImonyznrBDiOSEEdE2Bx21mGZMKAFVKrMHWIgIgljvAEZLM1YzmNkwHjLHcviJVpYM+6IkEdaGdvxeN7lyJx1BfXY2Az4KSCxIgpIRh2CAiqJzl3nAN7gggnlQxPj2NwvwAioLBGwYzX6APu2fLdc17wTSNesu2EfDnobU5kFNHxrQw8ucSlu+n4XVpcOkcVRsLUFLoRTLtYOBmDLFECirn0DR9wjDTe+hQz8omJuxeIcRWKSU0jSPUmA+vm2E2ch9/jM5DVRn8XhdSqybKi33YUV8G0wIGR+MwzQfTM8b+Eoy3U/irpRri1Dtze64ylkhge/02tDYXQkoLt+djWFpJQ1EYvG4NGcOCW+fYUOKHz+vFwM0VDE+MI+D3o2rT5oi0ZTuFj841kO4+MzQyUhxLxvHsrhBam0ugKBZiySySaRMKI+g6X5uGc2UN6nZ5MTC8hP6hQQR8+djV1LQsjcwr9P6nEz5P0L9rcGKcx2NxtIVa0NJQilQ2jTuLMUSjaXDOkefVkU0b4C4FwXwXKipKcX14EVcHryM/kI9Q/TZ7NZoY+gdEZNOa/2ZSPwAAAABJRU5ErkJggg==" />
+    <div class="label">home</div>
+</div>
+
+`;
+
+var iframe      = document.createElement('iframe');
+iframe.srcdoc   = srcdoc;
+iframe.onload   = onload;
+
+async function onload(){
+
+      console.clear();
+
+      var {toBlob}        = await import('https://cdn.jsdelivr.net/npm/html-to-image/+esm');
+      var blob            = await toBlob(iframe.contentDocument.querySelector('#home'));
+      var url             = window.URL.createObjectURL(blob);
+      
+      var img             = document.createElement('img');
+      img.style.cssText   = 'position:absolute;left:500px;top:100px;';
+      img.src             = url;
+      document.body.append(img);
+      
+      var a               = document.createElement('a');
+      a.href              = url;
+      a.download          = 'home.png';
+      a.click();
+      
+}//onload
+
+document.body.append(iframe);
