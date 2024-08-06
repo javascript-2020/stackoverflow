@@ -1,6 +1,6 @@
 ## all code posted to stackoverflow chat ##
 
-upto : Jul 2, 7:28
+upto : Jul 2 2024, 7:28
 
 https://chat.stackoverflow.com/rooms/17/javascript
 
