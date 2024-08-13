@@ -1,0 +1,181 @@
+
+//  james.js
+                                                                                console.clear();
+                                                                                console.log('james.js');
+(async()=>{
+
+        var roomid        = 17;
+        var email         = '';
+        var password      = '';
+        
+        var https;
+        var wsmod;
+        var cookies;
+        var opts;
+        var get;
+        var url;
+        
+        await init();
+        
+        
+                                                                                console.log('initial fkey');
+        var res                           = await fetch(url.login);
+        cookies.fetch(res);
+        var fkey                          = await get.fkey(res);
+        
+                                                                                console.log('login');
+        await login(fkey);
+        
+                                                                                console.log('chat fkey');
+        var res                           = await fetch(url.chat,opts.hdrs(null));
+        cookies.fetch(res);
+        var fkey                          = await get.fkey(res);
+        
+                                                                                console.log('wsurl');
+        var res                           = await fetch(url.ws,opts.post({roomid,fkey}));
+        if(!res.ok){
+                                                                                console.log('error');
+              return;
+        }
+        var wsurl                         = await res.json().then(json=>Promise.resolve(json.url));
+                                                                                console.log(wsurl);
+                                                                                
+        var ws                            = await wsmod.client(wsurl+'?l=99999999999',url.chat,onrec);
+                                                                                console.log('websocket',!!ws);
+        function onrec(payload,type,con){
+                                                                                console.log('chat message received');
+              var json    = JSON.parse(payload.toString());
+                                                                                console.log(json);
+              if(json.r17.e){
+                    var evt   = json.r17.e[0];
+                    if(evt['event_type']==1){
+                          if(evt.content.startsWith('-bot')){
+                                send('hello '+evt['user_name']);
+                          }
+                    }
+              }
+              
+        }//onrec
+        
+        async function send(text){
+        
+              var body    = `text=${encodeURIComponent(text)}&fkey=${fkey}`;
+              
+              var headers                 = {};
+              headers['content-type']     = 'application/x-www-form-urlencoded';
+              //headers['content-length']   = body.length;
+              headers.cookie              = cookies.build();
+              
+              var txt                     = await fetch(url.send,{method:'post',headers,body}).then(res=>res.text());
+                                                                                console.log(txt);
+        }//send
+        
+        
+        
+        async function init(){
+        
+              url                       = {};
+              url.login                 = 'https://stackoverflow.com/users/login';
+              url.chat                  = 'https://chat.stackoverflow.com/';
+              url.ws                    = url.chat+'ws-auth';
+              url.send                  = url.chat+'chats/17/messages/new';
+              
+              https                     = require('https');
+              
+              //wsmod                   = require('./wsmod.js');
+              var wsmod_url             = 'https://raw.githubusercontent.com/javascript-2020/libs/main/nodejs/wsmod/wsmod.js';
+              wsmod                     = await fetch(wsmod_url).then(res=>res.text().then(txt=>Promise.resolve(eval(txt))));
+              wsmod                     = wsmod();
+              
+              cookies                   = [];
+              cookies.fetch             = res=>{for(var [key,value] of res.headers)(key=='set-cookie' && cookies.parse(value))};
+              cookies.request           = res=>res.headers['set-cookie'].forEach(cookies.parse);
+              cookies.build             = ()=>{
+              
+                                                var str   = cookies.reduce((acc,cookie)=>(acc+=`${cookie.name}=${cookie.value}; `,acc),'')
+                                                return str;
+                                                                                console.log(str);
+                                          }//build
+              cookies.parse             = str=>{
+              
+                                                str         = str.split(';')[0];
+                                                var i       = str.indexOf('=');
+                                                var name    = str.slice(0,i);
+                                                var value   = str.slice(i+1);
+                                                console.log({name,value});
+                                                cookies.push({name,value});
+                                                
+                                          }//parse
+                                          
+              opts                      = {};
+              opts.hdrs                 = (contenttype='application/x-www-form-urlencoded')=>{
+              
+                                                var headers       = {};
+                                                headers.cookie    = cookies.build();
+                                                contenttype && (headers['content-type']=contenttype);
+                                                return {headers};
+                                                
+                                          }//hdrs
+              opts.post                 = params=>{
+              
+                                                var o       = opts.hdrs();
+                                                o.method    = 'post';
+                                                o.body      = get.body(params);
+                                                return o;
+                                                
+                                          }//post
+                                          
+              get                       = {};
+              get.fkey                  = async res=>{
+              
+                                                var txt     = await res.text();
+                                                var i       = txt.indexOf('name="fkey"');
+                                                var i1      = txt.indexOf('value="',i)+7;
+                                                var i2      = txt.indexOf('"',i1);
+                                                var fkey    = txt.slice(i1,i2);
+                                                                                console.log(fkey);
+                                                return fkey;
+                                                
+                                          }//fkey
+              get.body                  = params=>Object.keys(params).reduce((acc,key)=>acc+=`${key}=${encodeURIComponent(params[key])}&`,'').slice(0,-1);
+              
+        }//init
+        
+        function login(fkey){
+                                                                                //  login performs a redirect and we need
+                                                                                //  the cookies before this happens so
+                                                                                //  have to build the request
+                                                                                //  not sure if we actually need all these headers
+                                                                                //  but we certainly need some
+              var resolve,promise=new Promise(res=>resolve=res);
+              var body                      = get.body({email,password,fkey});
+              var headers                   = {};
+              headers['content-type']       = 'application/x-www-form-urlencoded';
+              headers.cookie                = cookies.build();
+              headers['content-length']     = body.length;
+              headers.host                  = 'stackoverflow.com';
+              headers.connection            = 'keep-alive';
+              headers.accept                = '*/*';
+              headers['accept-language']    = '*';
+              headers['sec-fetch-mode']     = 'cors';
+              headers['user-agent']         = 'node';
+              headers['accept-encoding']    = 'br,gzip,deflate';
+              headers.origin                = 'https://stackoverflow.com'
+              
+              var req   = https.request(url.login,{method:'post',headers},res=>{
+                                                                                console.log(res.statusCode,res.statusMessage);
+                                                                                //  i think this is a nodejs bug, whereby
+                                                                                //  res.on('end') is not called without res.on('data')
+                    res.on('data',data=>{});
+                    res.on('end',()=>{resolve()});
+                    cookies.request(res);
+                    
+              });
+              req.write(body);
+              req.end();
+              return promise;
+              
+        }//login
+        
+})();
+
