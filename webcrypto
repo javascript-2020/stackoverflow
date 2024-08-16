@@ -1,0 +1,228 @@
+function webcrypto(){
+
+  var obj   = {};
+  
+        var pretty    = {};
+        var rsa       = {};
+        
+        
+        obj.encrypt=async function(public,message){
+        
+              var buf             = txt_buf(message);
+              
+              var iv              = window.crypto.getRandomValues(new Uint8Array(16));
+              var key             = window.crypto.getRandomValues(new Uint8Array(16));
+              var encoded         = await window.crypto.subtle.importKey('raw',key.buffer,'AES-CTR',false,['encrypt','decrypt']);
+              var encrypted       = await window.crypto.subtle.encrypt({name:'AES-CTR',counter:iv,length:64},encoded,buf);
+              var data_b64        = buf_b64(encrypted);
+              
+              var buf             = new Uint8Array(32);
+              buf.set(iv,0);
+              buf.set(key,16);
+              var hdr_b64         = await rsa.encrypt(public,buf);
+              
+              var blob            = hdr_b64+'.'+data_b64;
+              return blob;
+              
+        }//encrypt
+        
+        obj.decrypt=async function(private,blob){
+        
+              var i               = blob.indexOf('.');
+              var hdr_b64         = blob.slice(0,i);
+              var data_b64        = blob.slice(i+1);
+              
+              var buf             = await rsa.decrypt(private,hdr_b64);
+              var iv              = buf.slice(0,16);
+              var key             = buf.slice(16);
+              var encoded         = await window.crypto.subtle.importKey('raw',key,'AES-CTR',false,['encrypt','decrypt']);
+              
+              var buf             = b64_buf(data_b64);
+              var decrypted       = await window.crypto.subtle.decrypt({name:'AES-CTR',counter:iv,length:64},encoded,buf);
+              var txt             = buf_txt(decrypted);
+              return txt;
+              
+        }//decrypt
+        
+  //:
+  
+        obj.keypair=async function(){
+        
+              var params          = {name:'RSA-OAEP',modulusLength:1024,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'};
+              var keys            = await window.crypto.subtle.generateKey(params,true,['encrypt','decrypt']);
+              return keys;
+              
+        }//keypair
+        
+        rsa.encrypt=async function(public,buf){
+        
+              var encrypted       = await window.crypto.subtle.encrypt({name:'RSA-OAEP'},public,buf);
+              var b64             = buf_b64(encrypted);
+              return b64;
+              
+        }//encrpyt
+        
+        rsa.decrypt=async function(private,b64){
+        
+              var buf             = b64_buf(b64);
+              var decrypted       = await window.crypto.subtle.decrypt({name:'RSA-OAEP'},private,buf);
+              return decrypted;
+              
+        }//decrypt
+        
+        obj.export=async function(type,key){
+        
+              var format          = type=='public' ? 'spki' : 'pkcs8';
+              var buf             = await window.crypto.subtle.exportKey(format,key);
+              var b64             = buf_b64(buf);
+              var pem             = hdr(type)+b64+ftr(type);
+              var txt             = pretty.out(pem);
+              return txt;
+              
+        }//export
+        obj.export.public         = public=>obj.export('public',public);
+        obj.export.private        = private=>obj.export('private',private);
+        
+        
+        obj.import=async function(type,txt){
+        
+              var pem             = pretty.in(txt);
+              var {b64}           = extract(pem);
+              var buf             = b64_buf(b64);
+              var params          = {name:'RSA-OAEP',hash:'SHA-256'};
+              var format          = type=='public' ? 'spki' : 'pkcs8';
+              var mode            = type=='public' ? 'encrypt' : 'decrypt';
+              var public          = await window.crypto.subtle.importKey(format,buf,params,true,[mode]);
+              return public;
+              
+        }//import
+        obj.import.public         = public_pem=>obj.import('public',public_pem);
+        obj.import.private        = private_pem=>obj.import('private',private_pem);
+        
+  //:
+  
+        var hdr   = (type='public')=>`-----BEGIN ${type.toUpperCase()} KEY-----`;
+        var ftr   = (type='public')=>`-----END ${type.toUpperCase()} KEY-----`;
+        
+        function extract(pem){
+        
+              var i1              = pem.indexOf('KEY')+8;
+              var i2              = pem.lastIndexOf('END')-5;
+              var hdr             = pem.slice(0,i1);
+              var b64             = pem.substring(i1,i2);
+              var ftr             = pem.slice(i2);
+              return {hdr,b64,ftr};
+              
+        }//extract
+        
+        
+        pretty.out=function(pem){
+        
+              var {hdr,b64,ftr}   = extract(pem);
+              var txt             = hdr+'\n';
+              var n               = hdr.length;
+              var i               = 0;
+              while(i<b64.length){
+              
+                    var str       = b64.slice(i,i+n);
+                    txt          += str.padEnd(n)+'\n';
+                    i            += n;
+                    
+              }//while
+              txt                += ftr;
+              return txt;
+              
+        }//pretty.out
+        
+        pretty.in=function(txt){
+        
+              txt                 = txt.trim();
+              var arr             = txt.split('\n');
+              var hdr             = arr.shift();
+              var ftr             = arr.pop();
+              var b64             = arr.join('').trim();
+              var pem             = hdr+b64+ftr;
+              return pem;
+              
+        }//pretty.in
+        
+  //:
+  
+        obj.txt_buf=function(txt){return txt_buf(txt)}
+        function txt_buf(txt){
+        
+              var buf             = new TextEncoder().encode(txt);
+              return buf;
+              
+        }//txt_buf
+        
+        obj.buf_txt=function(buf){return buf_txt(buf)}
+        function buf_txt(buf){
+        
+              var txt             = new TextDecoder().decode(buf);
+              return txt;
+              
+        }//buf_txt
+        
+        obj.buf_b64=function(buf){return buf_b64(buf)}
+        function buf_b64(buf){
+        
+              var bytes           = new Uint8Array(buf);
+              var bin             = bytes.reduce((acc,byte)=>acc+=String.fromCharCode(byte),'');
+              var b64             = btoa(bin);
+              return b64;
+              
+        }//buf_b64
+        
+        obj.b64_buf=function(b64){return b64_buf(b64)}
+        function b64_buf(b64){
+        
+              var bin             = atob(b64);
+              var bytes           = [...bin].map(c=>c.charCodeAt(0));
+              var buf             = new Uint8Array(bytes);
+              return buf;
+              
+        }//b64_buf
+        
+  //:
+  
+        obj.help=function(){
+        
+              var txt    = `
+              
+    alice wants to send bob a secure message
+    bob generates a keypair and sends alice the public key
+    alice encrypts the message and sends bob the result
+    bob uses the private key to decrypt what alice sends
+    
+    (async()=>{
+                                                                                    console.clear();
+            webcrypto             = webcrypto();
+            
+            var keys              = await webcrypto.keypair();
+            
+            var public            = await webcrypto.export.public(keys.publicKey);
+                                                                                    console.log(public);
+            var private           = await webcrypto.export.private(keys.privateKey);
+                                                                                    console.log(private);
+                                                                                    
+            var message           = 'helloworld';
+                                                                                    console.log(message);
+            public                = await webcrypto.import.public(public);
+            var blob              = await webcrypto.encrypt(public,message);
+                                                                                    console.log(blob);
+            private               = await webcrypto.import.private(private);
+            var message           = await webcrypto.decrypt(private,blob);
+                                                                                    console.log(message);
+    })();
+    
+              `;
+              return txt;
+              
+        }//help
+        
+        
+  return obj;
+  
+//webcrypto
+}
