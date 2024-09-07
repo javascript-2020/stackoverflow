@@ -65,6 +65,7 @@ need origin header on websocket upgrade
               util.join(17,fkey);
               
               console.clear();
+              console.log(help.display());
               
         }//ready
         
@@ -145,15 +146,10 @@ need origin header on websocket upgrade
                                           }
                                           req.send.status   = true;
                                           
-                                          var max   = 400;
-                                          if(text.length>max){
-                                                var t   = text.slice(max);
-                                                text    = text.slice(0,max);
-                                                req.send.queue.unshift({roomid,t,fkey});
-                                          }
                                                                           debug && console.log('send : '+text);
                                           var txt   = await fetch(url.send(roomid),util.opts({text,fkey})).then(res=>res.text());
                                                                           debug && console.log(txt);
+                                                                          
                                           var delay   = await req.send.delay(txt);
                                           if(delay){
                                                 req.send.queue.unshift({roomid,text,fkey});
@@ -1136,19 +1132,11 @@ need origin header on websocket upgrade
                     
                     send('.. my name is ..');
                     send('https://i.imgur.com/s3nbhRD.png');
+                    send('https://github.com/javascript-2020/stackoverflow/tree/main/bot');
                     load('james.js');
                     load('wsmod.js');
                     load('isolated-vm.js');
                     util.send.code(send,help.display());
-                    
-                    function post(code){
-                    
-                          var arr   = code.split('\n');
-                          arr       = arr.map(str=>'    '+str);
-                          code      = arr.join('\n');
-                          send(code);
-                          
-                    }//post
                     
                     function load(file){
                     
