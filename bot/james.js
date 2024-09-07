@@ -1136,9 +1136,9 @@ need origin header on websocket upgrade
                     
                     send('.. my name is ..');
                     send('https://i.imgur.com/s3nbhRD.png');
-                    await load('james.js');
-                    await load('wsmod.js');
-                    await load('isolated-vm.js');
+                    load('james.js');
+                    load('wsmod.js');
+                    load('isolated-vm.js');
                     util.send.code(send,help.display());
                     
                     function post(code){
@@ -1151,6 +1151,13 @@ need origin header on websocket upgrade
                     }//post
                     
                     function load(file){
+                    
+                          var txt   = fs.readFileSync(file,'utf8');
+                          util.send.code(send,txt);
+                          
+                    }//load2
+                    
+                    function load2(file){
                     
                           var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/bot/'+file;
                           fetch(url).then(res=>res.text().then(js=>{
