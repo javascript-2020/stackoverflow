@@ -18,8 +18,8 @@ need origin header on websocket upgrade
                                                                                 console.log('\n',' james.node.js','\n');
                                                                                 
                                                                                 
-        var email         = 'matthew.richards@email.com';
-        var password      = 'stack-43-re-www';
+        var email         = '';
+        var password      = '';
         
         var identifier    = 'bot';
         var admins        = ['matt'];
