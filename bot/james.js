@@ -16,10 +16,11 @@ need origin header on websocket upgrade
 (function james(){
                                                                                 console.clear();
                                                                                 console.log('\n',' james.node.js','\n');
+                                                                                console.json    = json=>console.log(JSON.stringify(json));
                                                                                 
                                                                                 
-        var email         = '';
-        var password      = '';
+        var email         = process.argv[2];
+        var password      = process.argv[3];
         
         var identifier    = 'bot';
         var admins        = ['matt'];
@@ -56,13 +57,14 @@ need origin header on websocket upgrade
               
               
               plugins.add(  test,admin,echo,choose,funfact,joke,random,stat,timer,unformatted,welcome,
-                            learn,unlearn,cmd,execute,bot,visit
+                            learn,unlearn,cmd,execute,bot,visit,execute2,execute2_next
               );
               
               
               util.join(1,fkey);
               util.join(17,fkey);
               
+              console.clear();
               
         }//ready
         
@@ -76,6 +78,7 @@ need origin header on websocket upgrade
         var sandbox   = txt=>'(()=>{var fn=\n'+txt+'\n;return fn})()';
         
         //wsmod       = require('./wsmod.js');
+                         https://raw.githubusercontent.com/javascript-2020/tmp/main/the-settlers.jsdos
         var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/bot/wsmod.js';
         fetch(url).then(res=>res.text().then(js=>{
         
@@ -91,9 +94,9 @@ need origin header on websocket upgrade
               isolated_vm   = mod();
               isolated_vm.install();
               
-        });
+        }));
         
-        
+        ;
         (async()=>{
         
               var time    = 10;
@@ -101,7 +104,7 @@ need origin header on websocket upgrade
               
               while(ct){
               
-                    if(wsmod && isolated_vm.install.complete){
+                    if(wsmod && isolated_vm && isolated_vm.install.complete){
                           ready();
                           return;
                     }
@@ -111,10 +114,14 @@ need origin header on websocket upgrade
                     
               }//while
                                                                                 console.log('init failed');
-        })();
+        })()
+        ;
         
 })()
 ;
+
+
+
 
 
         url                       = {};
@@ -229,14 +236,15 @@ need origin header on websocket upgrade
         util.rec                  = (roomid,payload,send)=>{
         
                                           var json    = JSON.parse(payload.toString());
-                                                                          debug && console.log('chat message received : '+JSON.stringify(json));
+                                                                          console.log('room'+roomid,'chat message received : '+JSON.stringify(json));
                                           var key   = 'r'+roomid;
                                           if(!json[key].e)return;
-                                          
+                                                                          //console.log('room'+roomid,'chat message received : '+JSON.stringify(json));
                                           var evt   = json[key].e[0];
                                           plugins.event(evt,send);
                                           
                                     }//rec
+                                    
         util.send                 = {};
         util.send.code            = (send,code)=>{
         
@@ -283,14 +291,61 @@ need origin header on websocket upgrade
                                           return opts;
                                           
                                     }//opts
-        util.args                 = (evt,plugin)=>{
+        util.content              = async evt=>{
+        
+                                          var content   = evt.content;
+                                          content       = decode(content);
+                                                                                                    //console.log(content);
+                                          if(content.startsWith("<div class='full'>")){
+                                                var i     = content.indexOf('</div>');
+                                                content   = content.substring(18,i);
+                                                content   = content.replaceAll('<br>','\n');
+                                                return content;
+                                          }
+                                          if(content.startsWith("<pre class='full'>")){
+                                                var i     = content.indexOf('</pre>');
+                                                content   = content.substring(16,i);
+                                                return content;
+                                          }
+                                          if( content.startsWith("<div class='partial'>") ||
+                                              content.startsWith("<pre class='partial'>")
+                                          ){
+                                                var content   = await fetch('https://chat.stackoverflow.com/messages/'+evt.room_id+'/'+evt.message_id).then(res=>res.text());
+                                                console.log('fetch',content);
+                                                return content;
+                                          }
+                                          return content;
+                                          
+                                          function decode(text) {
+                                              var entities = [
+                                                  ['amp', '&'],
+                                                  ['apos', '\''],
+                                                  ['#x27', '\''],
+                                                  ['#x2F', '/'],
+                                                  ['#39', '\''],
+                                                  ['#47', '/'],
+                                                  ['lt', '<'],
+                                                  ['gt', '>'],
+                                                  ['nbsp', ' '],
+                                                  ['quot', '"']
+                                              ];
+                                              
+                                              for (var i = 0, max = entities.length; i < max; ++i)
+                                                  text = text.replace(new RegExp('&' + entities[i][0] + ';', 'g'), entities[i][1]);
+                                                  
+                                              return text;
+                                          }
+                                          
+                                          
+                                    }//content
+        util.args                 = async(evt,plugin)=>{
         
                                           if(evt.event_type!=1)return {};
                                           if(!evt.content.startsWith(identifier))return {};
-                                          var cmd     = plugin.full||plugin.name;
-                                          var args    = evt.content.split(' ');
-                                          if(args[0]==identifier){
-                                                if(args[1]!=cmd)return {};
+                                          var cmd       = plugin.full||plugin.name;
+                                          var content   = await util.content(evt);
+                                          var args      = content.split(' ');
+                                          if(args[0]==identifier && args[1]==cmd){
                                                 args.splice(0,2);
                                                 return {hit:true,args};
                                           }
@@ -304,6 +359,10 @@ need origin header on websocket upgrade
                                                 
                                                       if(args[0]==identifier+plugin.short[i]){
                                                             args.splice(0,1);
+                                                            return {hit:true,args};
+                                                      }
+                                                      if(args[0]==identifier && args[1]==plugin.short[i]){
+                                                            args.splice(0,2);
                                                             return {hit:true,args};
                                                       }
                                                       
@@ -324,6 +383,10 @@ need origin header on websocket upgrade
                                           return {quoted,args:args2};
                                           
                                     }//quoted
+                                    
+                                    
+                                    
+                                    
                                     
                                     
   //plugins:
@@ -350,7 +413,8 @@ need origin header on websocket upgrade
         bot                       = bot();
         help                      = help();
         visit                     = visit();
-        
+        execute2                  = execute2();
+        execute2_next             = execute2_next();
         
         function test(){
         
@@ -361,9 +425,9 @@ need origin header on websocket upgrade
               };
               return plugin;
               
-              function event(evt,send){
+              async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     //send('hello '+evt.user_name);
@@ -383,9 +447,9 @@ need origin header on websocket upgrade
               };
               return plugin;
               
-              function event(evt,send){
+              async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     if(!admins.includes(evt.user_name))return;
                     
@@ -408,9 +472,9 @@ need origin header on websocket upgrade
               };
               return plugin;
               
-              function event(evt,send){
+              async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     send(args.join(' '));
@@ -428,9 +492,9 @@ need origin header on websocket upgrade
               };
               return plugin;
               
-              function event(evt,send){
+              async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     if(args.length==0){
@@ -457,7 +521,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     var url   = 'https://uselessfacts.jsph.pl/random.json?language=en';
@@ -484,7 +548,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     if(Math.random()<=0.1){
@@ -520,9 +584,9 @@ need origin header on websocket upgrade
               };
               return plugin;
               
-              function event(evt,send){
+              async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     if(args.length<2){
@@ -563,7 +627,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     if(!args.length){
@@ -645,7 +709,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     var milli   = time(args);
@@ -691,6 +755,11 @@ need origin header on websocket upgrade
               
         }//timer
         
+        
+        
+        
+        
+        
         function unformatted(){
         
               var format_message    = "Please don't post unformatted code - use the up arrow to edit your post, then hit Ctrl + K"    +
@@ -729,28 +798,33 @@ need origin header on websocket upgrade
                     
               }//event
               
-              function htmldecode(str){
-              
-                    var translate_re    = /&(nbsp|amp|quot|lt|gt);/g;
-                    var translate       = {
-                          nbsp    : ' ',
-                          amp     : '&',
-                          quot    : '"',
-                          lt      : '<',
-                          gt      : '>',
-                    };
-                    str   = str.replace(translate_re,(match,entity)=>translate[entity])
-                            .replace(/&#(\d+);/gi,(match,numStr)=>{
-                            
-                                  var num   = parseInt(numStr,10);
-                                  return String.fromCharCode(num);
-                                  
-                            });
-                    return str;
-                    
-              }//htmldecode
-              
         }//unformatted
+        
+        
+        
+        
+        function htmldecode(str){
+        
+              var translate_re    = /&(nbsp|amp|quot|lt|gt);/g;
+              var translate       = {
+                    nbsp    : ' ',
+                    amp     : '&',
+                    quot    : '"',
+                    lt      : '<',
+                    gt      : '>',
+              };
+              str   = str.replace(translate_re,(match,entity)=>translate[entity])
+                      .replace(/&#(\d+);/gi,(match,numStr)=>{
+                      
+                            var num   = parseInt(numStr,10);
+                            return String.fromCharCode(num);
+                            
+                      });
+              return str;
+              
+        }//htmldecode
+        
+        
         
         
         function welcome(){
@@ -812,7 +886,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     var cmd       = args.shift();
@@ -850,7 +924,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     var cmd     = args.shift();
@@ -914,7 +988,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     var code    = args.join(' ');
@@ -929,6 +1003,122 @@ need origin header on websocket upgrade
               }//event
               
         }//execute
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        var next        = [];
+        var max_time    = 60*1000;
+        
+        function execute2(){
+        
+              var plugin    = {
+                    name    : 'eval2',
+                    short   : ['>>'],
+                    desc    : 'execute sandboxed code',
+                    event
+              };
+              return plugin;
+              
+              async function event(evt,send){
+              
+                    var {hit,args}    = await util.args(evt,plugin);
+                    if(!hit)return;
+                    
+                                                                                //console.log('execute2',args);
+                    if(args.length==0){
+                          var index   = next.findIndex(o=>o.user==evt.user_name);
+                          if(index!=-1){
+                                next.splice(i,1);
+                          }
+                          var time    = Date.now();
+                                                                                //console.log('next');
+                          next.push({user:evt.user_name,time,roomid:evt.room_id,id:evt.message_id});
+                          return;
+                    }
+                    
+                                                                                //console.log('immediate');
+                    var code      = args.join('\n');
+                    var result    = await execute_eval(code);
+                    if(!result)return;
+                    util.send.code(send,result);
+                    
+              }//event
+              
+        }//execute2
+        
+        function execute2_next(){
+        
+              var plugin    = {
+                    name    : 'eval2-next',
+                    desc    : 'execute sandboxed code',
+                    event
+              };
+              return plugin;
+              
+              async function event(evt,send){
+              
+                    if(evt.event_type!=1)return;
+                    var index   = next.findIndex(o=>o.user==evt.user_name && o.roomid==evt.room_id && o.id!=evt.message_id);
+                    if(index!=-1){
+                          var o       = next.splice(index,1)[0];
+                          var time    = Date.now();
+                          if(o.time+max_time<time)return;
+                          var content   = await util.content(evt);
+                                                                                //console.log(content);
+                          var result    = await execute_eval(content);
+                                                                                //console.log(result);
+                          if(!result)return;
+                          util.send.code(send,result);
+                    }
+                    
+              }//event
+              
+        }//execute2_next
+        
+        
+        async function execute_eval(code){
+        
+              console.log(code);
+              var body    = JSON.stringify({code});
+              
+              try{
+              
+                    var res     = await fetch('https://sandbox-0e1xriditcay.runkit.sh/',{method:'post',body});
+                    
+              }//try
+              
+              catch(err){
+              
+                    var str   = 'an error ocurred : '+err.toString();
+                    console.log(str);
+                    return str;
+              }
+              
+              var json    = await res.json();
+              if(json.error){
+                    return json.error;
+              }
+                                                                                        //console.log(json);
+              var str     = json.log.reduce((ac,arr)=>ac+=arr.join(' ')+'\n','');       //console.log(...arr));
+              return str;
+              
+        }//execute_eval
+        
+        
+        
+        
+        
+        
         
         function bot(){
         
@@ -946,9 +1136,9 @@ need origin header on websocket upgrade
                     
                     send('.. my name is ..');
                     send('https://i.imgur.com/s3nbhRD.png');
-                    load('james.js');
-                    load('wsmod.js');
-                    load('isolated_vm.js');
+                    await load('james.js');
+                    await load('wsmod.js');
+                    await load('isolated-vm.js');
                     util.send.code(send,help.display());
                     
                     function post(code){
@@ -965,14 +1155,13 @@ need origin header on websocket upgrade
                           var url       = 'https://raw.githubusercontent.com/javascript-2020/stackoverflow/main/bot/'+file;
                           fetch(url).then(res=>res.text().then(js=>{
                           
-                                util.send.code(send,txt);
+                                util.send.code(send,js);
                                 
-                          }
+                          }));
                           
                     }//load
                     
               }//event
-              
               
         }//bot
         
@@ -988,7 +1177,7 @@ need origin header on websocket upgrade
               
               async function event(evt,send){
               
-                    var {hit,args}    = util.args(evt,plugin);
+                    var {hit,args}    = await util.args(evt,plugin);
                     if(!hit)return;
                     
                     if(args.lenth==0){
@@ -1013,7 +1202,7 @@ need origin header on websocket upgrade
                           var s;
                           while(i<n){
                           
-                                s  = plugin.desc.slice(i,i+m)+'\n';
+                                s  = plugin.desc.slice(i,i+m);
                                 if(i>0){
                                       s   = ''.padStart(max+8)+s;
                                 }
@@ -1030,7 +1219,10 @@ need origin header on websocket upgrade
               
         }//help
         
-        function visited(){
+        
+        var visitors    = [];
+        
+        function visit(){
         
               var plugin    = {
                     name    : 'visit',
@@ -1054,7 +1246,7 @@ need origin header on websocket upgrade
                     }
                     
                     if(evt.event_type==1){
-                          var {hit,args}    = util.args(evt,plugin);
+                          var {hit,args}    = await util.args(evt,plugin);
                           if(!hit)return;
                           if(args.length==0){
                           }
@@ -1084,11 +1276,6 @@ need origin header on websocket upgrade
               }//nday
               
         }//visited
-        
-        
-        
-        
-        
         
         
         
@@ -1183,6 +1370,9 @@ need origin header on websocket upgrade
 */
 
 //  || learn files <a href=\"https://javascript-2020.github.io/download/github-folder.html?%7B1%7D\" rel=\"nofollow noopener noreferrer\">{1}</a>
+
+
+
 
 
 
