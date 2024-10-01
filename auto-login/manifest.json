@@ -1,0 +1,31 @@
+
+/*  manifest.json
+*/
+
+
+{
+
+        "manifest_version"                        : 3,
+        
+        "name"                                    : "auto-fill",
+        "version"                                 : "1.0.0",
+        
+        "background": {
+        
+              "service_worker"    : "background.js"
+              
+        },
+        
+        "content_scripts": [
+              {
+                    "matches"     : ["*://localhost/*"],
+                    "js"          : ["fill-form.js"],
+                    "run_at"      : "document_idle"
+              }
+        ],
+        
+        "permissions" : ["tabs","activeTab","storage"]
+        
+        
+        
+}
