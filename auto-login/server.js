@@ -33,7 +33,7 @@
               if(!session){
                     cookie    = (''+Math.random()).slice(2)
                     session   = sessions.create(cookie);
-                    headers   = {'set-cookie':`autofill=${cookie};httpOnly;SameSite=strict`};
+                    headers['set-cookie']        = `autofill=${cookie};httpOnly;SameSite=strict`};
               }else{
                     user      = users.find(user=>user.cookie==cookie);
               }
