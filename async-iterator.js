@@ -23,18 +23,6 @@ console.clear();
     }//fn
     
 
-    
-    var iterator    = asyncIterator();
-    function asyncIterator(){
-    
-          var iterator        = ()=>{return {next:()=>new Promise(res=>iterator.resolve=res)}};
-          iterator.resolve    = null;
-          return iterator;
-          
-    }//asynciterator
-
-
-
     function read(value){
     
           iterator.resolve({value});
@@ -47,7 +35,19 @@ console.clear();
           
     }//end
 
+
+
+
     
+    var iterator    = asyncIterator();
+    function asyncIterator(){
+    
+          var iterator        = ()=>{return {next:()=>new Promise(res=>iterator.resolve=res)}};
+          iterator.resolve    = null;
+          return iterator;
+          
+    }//asynciterator
+
 
 
 
