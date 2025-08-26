@@ -1,6 +1,6 @@
 import ify from 'https://cdn.jsdelivr.net/npm/string.ify/+esm';
 
-export default funtion(v){
+export default funtion stringify(v){
 
       var str   = ify(v);
       str       = str.replace('{','{\n\n ');
