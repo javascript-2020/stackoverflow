@@ -350,7 +350,6 @@
 	window.stringify = function(v){
     
         var str   = string_ify(v);
-        var str   = stringify(v);
         str       = str.replace('{','{\n\n ');
         str       = str.replace(/^([^:\n]*?):/gm, '$1  :');
         str       = str.replace('}','\n\n}');
